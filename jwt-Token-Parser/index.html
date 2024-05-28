@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+   <head>
+        <title>JWT token Parser</title>
+        <meta charset="utf-8" />
+        <meta name="author" content="SidPro"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+        <meta name="description" content="The JWT Token Parser is a handy tool designed to simplify the process of decoding JSON Web Tokens (JWT). With a user-friendly interface,
+        this parser allows you to paste your JWT and instantly see its decoded payload in a well-formatted and color-coded manner"/>
+        <meta name="keywords" content="jwt,jwt parser,jwt token,extract token data,extract jwt,jwt token parser"/>
+        <!-- icons -->
+        <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+        <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+        <link rel="manifest" href="../icons/manifest.json" />
+        <!-- icons -->
+        <script src="jwt.js" type="text/javascript" defer></script>
+        <link href="style.css" rel="stylesheet" type="text/css" charset="utf-8" />
+   </head>
+   <body>
+        <h1>JWT Token Parser</h1>
+        <p>The JWT Token Parser is a handy tool designed to simplify the process of decoding JSON Web Tokens (JWT). With a user-friendly interface,
+             this parser allows you to paste your JWT and instantly see its decoded payload in a well-formatted and color-coded manner. The tool 
+             ensures the parsed content is easily readable, highlighting different data types such as strings, numbers, booleans, and keys with 
+             distinct colors. Additionally, it displays the token's expiration time in a human-readable format. Whether you're a developer or 
+             a security enthusiast, the JWT Token Parser provides a quick and efficient way to inspect and validate the contents of your JWTs.
+        </p>
+        <div id="ip"></div>
+        <noscript>
+            <i style="color:orange;font-size:24px;">Your browser does not support JavaScript!</i><br/>
+            <img src="../image/noscript.png" style="width:auto;height:auto;" />
+         </noscript>
+        <label for="textarea">Paste JWT:</label>
+      <textarea id="textarea" name="jwt" rows="4" cols="50"></textarea>
+      <div id="d"></div>
+      <div id="result"></div>
+      <p>
+         © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+      </p>
+   </body>
+   <script src="https://api.ipify.org?format=jsonp&callback=getIP" defer></script>
+</html>

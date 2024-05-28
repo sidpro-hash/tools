@@ -1,0 +1,109 @@
+<html>
+    <head>
+        <title>Age Calculator</title>
+        <meta charset="utf-8" />
+        <meta name="author" content="SidPro"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+        <meta name="description" content="The Age Calculator is a simple yet powerful tool designed to help you determine the exact age 
+        based on birth date or calculate the time difference between two dates."/>
+        <meta name="keywords" content="Age Calculator,Calculator Age,date difference,age difference,calculate age,age, calculate,calculator"/>
+        <!-- icons -->
+        <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+        <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+        <link rel="manifest" href="../icons/manifest.json" />
+        <!-- icons -->
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="maincontainer">
+            <div class="calculator">
+                <h1><span>Age Calculator</span></h1>
+                <p>The Age Calculator can determine the age or interval between two dates. The calculated age will be displayed in years, months, weeks, days, hours, minutes, and seconds.</p>
+                <div class="input-box">
+                    <input type="date" id="from" />
+                    <input type="date" id="to" />
+                    <button onclick="calculateAge()">Calculate</button>
+                </div>
+                <noscript>
+                    <i style="color:orange;font-size:24px;">Your browser does not support JavaScript!</i><br/>
+                    <img src="../image/noscript.png" style="width:auto;height:auto;" />
+                </noscript>
+                <p id="result"></p>
+                <p style="margin-top: 20px;margin-bottom: 50px;text-align: center;">
+                    © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+                </p>
+            </div>
+        </div>
+        <script>
+
+            let from = document.getElementById("from");
+            let to = document.getElementById("to");
+            // set default date
+            let currentDate = new Date().toISOString().substr(0, 10);
+            from.value = currentDate;
+            to.value = currentDate;
+            to.min = currentDate;
+            from.max = currentDate;
+
+            function calculateAge(){
+                let from = document.getElementById("from");
+                let to = document.getElementById("to");
+                let result = document.getElementById("result");
+                let fromDate = new Date(from.value);
+                let toDate = new Date(to.value);
+                
+                let d1 = fromDate.getDate();
+                let m1 = fromDate.getMonth() + 1;
+                let y1 = fromDate.getFullYear();
+
+                let d2 = toDate.getDate();
+                let m2 = toDate.getMonth() + 1;
+                let y2 = toDate.getFullYear();
+
+                let d3,m3,y3;
+
+                y3 = y2 - y1;
+                
+                if(m2 >= m1){
+                    m3 = m2 - m1;
+                }else{
+                    y3--;
+                    m3 = 12 + m2 - m1;
+                }
+
+                if(d2 >= d1){
+                    d3 = d2 - d1;
+                }else{
+                    m3--;
+                    d3 = getDaysInMonth(y1,m1) + d2 - d1;
+                }
+
+                if(m3 < 0){
+                    m3 = 11;
+                    y3--;
+                }
+
+                result.innerHTML = `<span>${y3}</span> years <span>${m3}</span> months <span>${d3}</span> days`;
+
+            }
+
+            function getDaysInMonth(year, month){
+                return new Date(year, month, 0).getDate();
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,83 @@
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    
+}
+body{
+    background: #eaeef6;
+    font-family: "Spline Sans", sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+}
+.maincontainer{
+    width: 100%;
+    max-width: 80%;
+    min-height: 200px;
+    margin: auto;
+}
+.maincontainer h1{
+    font-family: 'Poppins', sans-serif;
+    color: #6558d3;
+    margin-top: 50px;
+
+    font-size: 44px;
+}
+.maincontainer .description{
+    text-align: justify;
+}
+
+.toolrow{
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    margin: 10vh auto;
+}
+.tool{
+    border-radius: 16px;
+    box-shadow: 0 30px 30px -25px rgba(65, 51, 183, 0.25);
+    background-color: #fff;
+    padding: 1.5rem;
+    width: 25%;
+}
+
+.tool .title {
+font-size: 1.5rem;
+color: #141b22;
+line-height: 1.25;
+}
+.tool .title + * {
+margin-top: 1rem;
+}
+.tool .info {
+color:  #a0a0a0;
+}
+.tool .info + * {
+margin-top: 1.25rem;
+}
+.tool .button {
+font: inherit;
+line-height: 1;
+background-color: #fff;
+border: 2px solid #6558d3;
+color: #6558d3;
+padding: 0.5em 1em;
+border-radius: 6px;
+font-weight: 500;
+display: inline-flex;
+align-items: center;
+justify-content: space-between;
+gap: 0.5rem;
+}
+.tool .button:hover {
+background-color: #6558d3;
+color: #fff;
+cursor: pointer;
+}
+
+@media only screen and (max-width: 600px){
+    .toolrow {
+        flex-wrap: wrap;
+    }
+  }

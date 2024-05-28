@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Live Editor</title>
+    <meta name="author" content="SidPro">
+    <meta name="description" content="The Live HTML, CSS, and JavaScript Simulator is an indispensable tool for web developers and designers. This interactive platform allows you to write, test, and visualize your code in real-time. ">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!-- icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+    <link rel="manifest" href="../icons/manifest.json" />
+    <!-- icons -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" integrity="sha512-GZ1RIgZaSc8rnco/8CXfRdCpDxRCphenIiZ2ztLy3XQfCbQUSCuk8IudvNHxkRA3oUg6q0qejgN/qqyG1duv5Q==" crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.min.js"></script>
+    <style>
+      html,body{
+        margin: 0;
+        padding:0;
+        height:100%;
+        width: 100%;
+      }
+      #editor{
+        width: 49.6%;
+        height: 93.5%;
+        min-width: 5%;
+        max-width: 94.2%;
+        display: inline-block;
+      }
+      #ifrm{
+        height: 93.5%;
+        width: 49.6%;
+        min-width: 5%;
+        max-width: 94.2%;
+        overflow: auto;
+        display: inline-block;
+      }
+      #resizel{
+        height: 93.5%;
+        width:0.8%;
+        cursor: col-resize;
+        background-color: black;
+        user-select: none;
+        display: inline-block;
+        background: rgb(36,32,30);
+        background: linear-gradient(180deg, rgba(36,32,30,1) 0%, rgba(92,161,16,0.5858543246400123) 100%);
+      }
+      .nav{
+        height: 5.5%;
+        width: 100%;
+        padding: 2px 0 0px 0;
+        background: rgb(36,32,30);
+        background: linear-gradient(180deg, rgba(36,32,30,1) 0%, rgba(92,161,16,0.5858543246400123) 100%);
+      }
+      select{
+        padding: 4px 0px 0px 0px;
+        margin: 0;
+        width: 150px;
+        height: 90%;
+        color:#45A29E;
+        font-family: Arial;
+        font-weight: bold;
+        font-size: 14px;
+        background:#1F2833 url('adjust-solid.svg') no-repeat 90% 50%;
+        -webkit-appearance: none;
+        appearance: none;
+        border: 1px solid #2e3340;
+        margin-left: 5px;
+        border-radius: 5px;
+      }
+      select:hover{
+        cursor: pointer;
+      }
+      label{
+        margin-left: 5px;
+        color:white;
+        font-family: Arial;
+        font-weight: bold;
+        font-size: 14px;
+      }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+      .slider:hover{cursor: pointer;}
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: -7px;
+        left: 40px;
+        right: -40px;
+        bottom: 7px;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+      }
+
+      input:checked + .slider {
+        background: rgb(36,32,30);
+        background: linear-gradient(180deg, rgba(36,32,30,1) 0%, rgba(92,161,16,0.5858543246400123) 100%);
+      }
+
+      input:focus + .slider {
+        box-shadow: 0 0 1px rgb(36,32,30);
+      }
+
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+
+      /* Rounded sliders */
+      .slider.round {
+        border-radius: 34px;
+      }
+
+      .slider.round:before {
+        border-radius: 50%;
+      }
+      .btn {
+        background-color: DodgerBlue;
+        border: none;
+        color: white;
+        padding: 8px 24px;
+        height: auto;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      /* Darker background on mouse-over */
+      .btn:hover {
+        background-color: RoyalBlue;
+
+      }
+
+      @media only screen and (max-width: 800px) {
+        .btn{
+          padding:6px 14px;
+          font-size: 14px;
+          height: auto;
+        }
+        select{
+          margin-left: 1%;
+          width: 150px;
+        }
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 40px;
+          height: 20px;
+        }
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0px;
+          left: 40px;
+          right: -40px;
+          bottom: 0px;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 16px;
+          width: 16px;
+          left: 4px;
+          bottom: 2px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+        input:checked + .slider:before {
+          -webkit-transform: translateX(16px);
+          -ms-transform: translateX(16px);
+          transform: translateX(16px);
+        }
+        #check{
+          float: right;
+        }
+        #resizel{
+          display: none;
+        }
+        #ifrm{
+          max-width: 100%;
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+        #editor{
+          max-width: 100%;
+          width: 100%;
+          height: 80%;
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body onload="ready()" onresize="Reassign()">
+    <div class="nav">
+      <!-- <label for="theme">Theme :</label> -->
+      <select title="Select Theme" id="theme" size="1">
+        <option value="ace/theme/chrome">Chrome</option>
+        <option value="ace/theme/cobalt">Cobalt</option>
+        <option value="ace/theme/crimson_editor">Crimson Editor</option>
+        <option value="ace/theme/dracula">Dracula</option>
+        <option value="ace/theme/eclipse">Eclipse</option>
+        <option value="ace/theme/gruvbox">Gruvbox</option>
+        <option value="ace/theme/idle_fingers">Idle Fingers</option>
+        <option value="ace/theme/merbivore">Merbivore</option>
+        <option value="ace/theme/merbivore_soft">Merbivore Soft</option>
+        <option value="ace/theme/monokai" selected>Monokai</option>
+        <option value="ace/theme/sqlserver">Sqlserver</option>
+        <option value="ace/theme/terminal">Terminal</option>
+        <option value="ace/theme/xcode">Xcode</option>
+      </select>
+       <button title="Run Code" type="button" onclick="update();" class="btn tooltip"><i style="color:white" class="fas fa-play"></i></button>
+       <button title="Download File" type="button" onclick="download();" class="btn tooltip"><i class="fas fa-file-download"></i></button>
+      <label class="switch"><b>Auto</b>
+        <input id="check" type="checkbox">
+        <span title="Enable/Disable Live" class="slider round"></span>
+      </label>
+    </div>
+    <noscript>
+        <i style="color:orange;font-size:24px;">Your browser does not support JavaScript!</i><br/>
+        <img src="../image/noscript.png" style="width:auto;height:auto;" />
+    </noscript>
+      <div id="editor"></div><div id="resizel"></div><iframe id="ifrm" src="<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title of the document</title>
+  </head>
+
+  <body>
+
+  The content of the document......
+  </body>
+</html>" frameBorder="0"></iframe>
+
+
+      <script defer>
+      function update() {
+        var x = document.getElementById('ifrm');
+        x.srcdoc = editor.getValue();
+      }
+      function setupEditor() {
+      var config = require("ace/config");
+	config.init();
+        window.editor = ace.edit("editor");
+        editor.getSession().setUseWorker(false);
+        editor.setOptions({
+          autoScrollEditorIntoView: true,
+          copyWithEmptySelection: false,
+          animatedScroll: true,
+          fontSize:16,
+          wrap:true,
+          enableBasicAutocompletion: true,
+          enableLiveAutocompletion: true,
+          enableSnippets: false,
+        });
+        editor.setTheme(document.getElementById('theme').value);
+        editor.session.setMode("ace/mode/html");
+        editor.setValue(`<!DOCTYPE html>
+  <html>
+    <head>
+      <title>Title of the document</title>
+    </head>
+
+    <body style="background:#2e3340;color:lightgray;font-size:18px">
+    <!-- 'Ctrl +' to increase font size -->
+    <!-- 'Ctrl -' to decrease font size -->
+    <!-- 'Ctrl 0' to Reset Font size -->
+    <!-- 'Ctrl q' for more help -->
+    The content of the document......
+    </body>
+  </html>`,1); // 1 = moves cursor to end
+          editor.getSession().on('change',function(){
+            $("#check").blur();
+            var x = document.getElementById('check');
+            if(x.checked == true)update();
+          });
+          editor.commands.addCommand({
+	    name: 'increasefontsize',
+	    bindKey: {win: 'Ctrl-+',  mac: 'Command-+'},
+	    exec: function(editor) {
+	    
+		let fontp = editor.getFontSize();
+		fontp = ((fontp + 2) > 30 ?30:(fontp+2));
+		editor.setFontSize(fontp);
+		editor.resize();
+	    }
+	 });
+	 editor.commands.addCommand({
+	    name: 'decreasefontsize',
+	    bindKey: {win: 'Ctrl--',  mac: 'Command--'},
+	    exec: function(editor) {
+	    
+		let fontp = editor.getFontSize();
+		fontp = ((fontp - 2) < 12 ?12:(fontp-2));
+		editor.setFontSize(fontp);
+		editor.resize();
+	    }
+	 });
+	 editor.commands.addCommand({
+	     name: "resetFontSize",
+	    bindKey: {win: 'Ctrl+0|Ctrl-Numpad0',  mac: 'Command+0|Command-Numpad0'},
+	    exec: function(editor) {
+		editor.setFontSize(16);
+		editor.resize();
+	    }
+	 });
+	 editor.commands.addCommand({
+	     name: "showKeyboardShortcuts",
+    	     bindKey: {win: 'Ctrl-q|Ctrl+q', mac: 'Command-q'},
+	    exec: function(editor) {
+		config.loadModule("ace/ext/keybinding_menu", function(module) {
+		    module.init(editor);
+		    editor.showKeyboardShortcuts();
+		});
+	    }
+	 });
+          if(window.innerWidth > 800){
+            editor.setOptions({
+              enableBasicAutocompletion: false,
+              enableLiveAutocompletion: false,
+            });
+          }
+    }
+    function download() {
+      var filename = "sample-from-Live-DHTML.html";
+      var text = editor.getValue();
+      var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/html;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', filename);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+    window.onbeforeunload = function(event){return confirm("Confirm refresh");}
+    $("#check").blur();
+      function ready() {
+        setupEditor();
+        update();
+      }
+      $('#theme').on('change', function (ev) {
+          var mode = $('option:selected').attr('value');
+          editor.setTheme(mode);
+      });
+      // In order to make it draggable, we need to handle three events:
+      // mousedown on the element: Track the current position of mouse
+      // mousemove on document: Calculate how far the mouse has been moved, and determine the position of element
+      // mouseup on document: Remove the event handlers of document
+      // The current position of mouse
+
+      const ele = document.getElementById('resizel');
+      const editl = ele.previousElementSibling;
+      const framel = ele.nextElementSibling;
+
+      // The current position of mouse
+      let x = 0;
+      //let y = 0;
+
+      // Width of left side
+      let editlWidth = 0;
+      let framelWidth = 0;
+      // Handle the mousedown event
+      // that's triggered when user drags the ele
+      const mouseDownHandler = function(e) {
+          // Get the current mouse position
+          x = e.clientX;
+          //y = e.clientY;
+          editlWidth = editl.getBoundingClientRect().width;
+          framelWidth = framel.getBoundingClientRect().width;
+          // Attach the listeners to `document`
+          document.addEventListener('mousemove', mouseMoveHandler);
+          document.addEventListener('mouseup', mouseUpHandler);
+      };
+
+      // Attach the handler
+      ele.addEventListener('mousedown', mouseDownHandler);
+
+      const mouseMoveHandler = function(e) {
+          // How far the mouse has been moved
+          const dx = e.clientX - x;
+          //const dy = e.clientY - y;
+
+          const newLeftWidth = (editlWidth + dx) * 100 / ele.parentNode.getBoundingClientRect().width;
+          const newRightWidth = (framelWidth - dx) * 100 / ele.parentNode.getBoundingClientRect().width;
+          editl.style.width = `${newLeftWidth}%`;
+          framel.style.width = `${newRightWidth}%`;
+          editor.resize();
+          ele.style.cursor = 'col-resize';
+          document.body.style.cursor = 'col-resize';
+          editl.style.userSelect = 'none';
+          editl.style.pointerEvents = 'none';
+
+          framel.style.userSelect = 'none';
+          framel.style.pointerEvents = 'none';
+      };
+      const mouseUpHandler = function() {
+          ele.style.removeProperty('cursor');
+          document.body.style.removeProperty('cursor');
+
+          editl.style.removeProperty('user-select');
+          editl.style.removeProperty('pointer-events');
+
+          framel.style.removeProperty('user-select');
+          framel.style.removeProperty('pointer-events');
+
+          // Remove the handlers of `mousemove` and `mouseup`
+          document.removeEventListener('mousemove', mouseMoveHandler);
+          document.removeEventListener('mouseup', mouseUpHandler);
+      };
+      function Reassign(){
+        if(window.innerWidth > 800){
+          framel.style.width = "49.6%";
+          editl.style.width = "49.6%";
+          editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+          });
+          editor.resize();
+        }else{
+          framel.style.width = "100%";
+          editl.style.width = "100%";
+          editor.setOptions({
+            enableBasicAutocompletion: false,
+            enableLiveAutocompletion: false,
+          });
+          editor.resize();
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,110 @@
+<html>
+    <head>
+        <title>Random Password Generator</title>
+        <meta charset="utf-8" />
+        <meta name="author" content="SidPro"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+        <meta name="description" content="The Random Password Generator is a robust tool designed to help you create secure and unpredictable 
+        passwords instantly. Whether you need a password for personal use or professional purposes, this generator ensures the utmost security 
+        by producing complex combinations of letters, numbers, and special characters. Its user-friendly interface allows you to customize 
+        the length and complexity of your passwords, making it an essential tool for protecting your online accounts and sensitive information 
+        against unauthorized access."/>
+        <meta name="keywords" content="random password,password tool,password generator,generate password,random password generator"/>
+        <!-- icons -->
+        <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+        <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+        <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+        <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+        <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+        <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+        <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+        <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+        <link rel="manifest" href="../icons/manifest.json" />
+        <!-- icons -->
+        <link rel="stylesheet" href="style.css" />
+        <script src="zxcvbn.js" type="text/javascript"></script>
+        <script src="pass.js" type="text/javascript" defer></script>
+    </head>
+    <body onload="generateRandomTip()">
+        <div class="maincontainer">
+            <h1>Random Password Generator</h1>
+            <div class="tip"> 
+                <span>Tip:</span> 
+                <span id="tip"></span> 
+            </div>
+            
+                <div class="display">
+                    <input type="text" id="passBox" onkeyup="checkThisPassword(this.value);getEntropy(this.value);" placeholder="Password">
+                    <img src="images/refresh.png" alt="regenerate" title="regenerate" onclick="generatePass();"/>
+                    <img id="copyIcon" src="images/copy.png" title="copy" onclick="changeColor(this);copyToClipboard();"/>
+                </div>
+                
+                <noscript>
+                    <i style="color:orange;font-size:24px;">Your browser does not support JavaScript!</i><br/>
+                    <img src="../image/noscript.png" style="width:auto;height:auto;" />
+                </noscript>
+            <div class="generate_button chars_holder">
+                <div class="char_type" id="special_count"> <span class="char_type_text" style="padding-right:16px">Symbols</span></div>
+                <div class="char_type" id="digits_count"> <span class="char_type_text" style="padding-right:13px">Numbers</span></div>
+                <div class="char_type" id="upper_count"> <span class="char_type_text">Upper case</span></div>
+                <div class="char_type" id="lower_count"> <span class="char_type_text">Lower case</span></div>
+                <div id="char_count"> <span id="character_count">0</span> characters containing:</div>
+                <div class="breaker">  </div>
+             </div>
+
+            <div class="result col_left">
+                Time to crack your password: 
+                <span id="first_estimate">
+                    0 second
+                </span>
+             </div>
+             <div id="resultid"></div>
+             
+            <div class="userInput">
+                <div class="inputRange">
+                    <input type="range" name="lenrange" min="4" max="30" value="10" class="infull" oninput="return doSliding(this.value);" onchange="return doSliding(this.value);" />
+                    <input type="number" name="lennumber" min="4" max="30" value="10" class="infull" style="text-align:left;" onchange="return doInput(this.value);">
+                </div>
+                <div class="selectionOptions">
+                    <div><label for="ilower" class="cbcontainer"><input type="checkbox" name="ilower" id="ilower" value="1" checked onClick="generatePass();"><span class="cbmark"></span>Include Lower Case (a-z)</label></div>
+                    <div><label for="iupper" class="cbcontainer"><input type="checkbox" name="iupper" id="iupper" value="1" checked onClick="generatePass();"><span class="cbmark"></span>Include Upper Case (A-Z)</label></div>
+                    <div><label for="inumber" class="cbcontainer"><input type="checkbox" name="inumber" id="inumber" value="1" checked onClick="generatePass();"><span class="cbmark"></span>Include Numbers (0-9)</label></div>
+                    <div><label for="isymbol" class="cbcontainer"><input type="checkbox" name="isymbol" id="isymbol" value="1" checked onClick="generatePass();"><span class="cbmark"></span>Include Symbols (!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~)</label></div>
+                    <div><label for="iexclude" class="cbcontainer"><input type="checkbox" name="iexclude" id="iexclude" value="1" checked onClick="generatePass();"><span class="cbmark"></span><u>Exclude</u> Ambiguous Characters (iIl1L| o0O `'-_":;.,)</label></div>
+                    <div><label for="iexcludeb" class="cbcontainer"><input type="checkbox" name="iexcludeb" id="iexcludeb" value="1" checked onClick="generatePass();"><span class="cbmark"></span><u>Exclude</u> Brackets (<>()[]{})</label></div>
+                    <div><label for="iunique" class="cbcontainer"><input type="checkbox" name="iunique" id="iunique" value="1"  onClick="generatePass();"><span class="cbmark"></span>No Repeated Characters</label></div>
+                </div>
+            </div>
+            <div class="result col_right"> <span id="metaphor"></span> <span id="explanation"></span></div>
+            <div class="small_text"> Your passwords are never stored. Even if they were, we have no idea who you are!</div>
+            <br/><br/><br/>
+            <div class="info">
+                <h3>Password :</h3>
+                <p>A password is typically a string of characters that may include letters, numbers, and symbols that can be used to access something, typically an account, and prevent others from accessing it. In today's Internet age, it is likely that most people have experience with having a password for some kind of account. As such, it is important to understand how to construct a strong password (or use a password generator) as well as to understand how to take measures to safeguard the password.</p>
+                <br/>
+                <p>The <b>Random password generator</b> on this website provides the user with the option to exclude ambiguous characters. This includes characters like the letters "L" and "I" which may be difficult to distinguish on a computer. This is particularly relevant when using a random password generator. An upper-case "i" can be difficult to distinguish from a lower-case "L" or the number 1 in some cases. Confusion arising from ambiguous characters could potentially lock the user out of their own account. Note however, that excluding characters generally lowers the potential strength of a password.</p>
+                <br/><br/>
+                <h3>Password entropy:</h3><br/>
+                <p>The password generator also determines the password entropy, measured in bits. The higher the entropy, the more difficult it will be for the password to be guessed. In the context of a brute force search (where every possibility is tested), a password entropy of 100 bits would require 2<sup>100</sup> attempts for all possibilities to be exhausted. On average however, about half of these possibilities would need to be exhausted before the correct one is found in a brute force search.</p>
+                <br/><br/>
+                <h3>Password strength:</h3><br/>
+                <p>Password strength is a measure of how effective a password is against being guessed or against brute-force attacks. Although it varies, usually, password strength is an estimate of how many trials would be required on average for someone to successfully guess the password. This is affected by the length, complexity, and unpredictability of the password. For example, if a password involves a person's name, birthday, or other personal information that typically would not be very difficult to find out, the password would likely make for a weak password.</p>
+                <p>Aside from the actual password, proper security controls play a significant role in reducing the risk of a security breach. Security controls include safeguards that are in place to detect, avoid, or minimize security risks. This includes controls such as two-step authentication for your password, or locking the account for a period of time after a given number of failed attempts.</p>
+                <br/>
+                
+            </div>
+            <br/>
+            <p style="margin-top: 20px;margin-bottom: 50px;text-align: center;">
+                © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+            </p>
+        </div>
+    </body>
+</html>

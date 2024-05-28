@@ -1,0 +1,247 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+body{
+	background: #2e3340;
+	color: #fff;
+}
+.maincontainer{
+    color: #fff;
+    width: 100%;
+    max-width: 80%;
+    min-height: 200px;
+    margin: auto;
+	margin-top: 2%;
+}
+.info{
+	text-align: justify;
+	font-family: calibri;
+	background: #eeeeee;
+	color: #000;
+	padding: 5px;
+}
+
+.display{
+    width: 700px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    color: #333;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 5px;
+}
+.display img{
+    width : 24px;
+	margin-left: 10px;
+    cursor: pointer;
+}
+.display input{
+    border: 0;
+    outline: 0;
+    font-size: 22px;
+    width: 100%;
+}
+
+.inputRange{
+    margin: 5px;
+    width: 700px;
+    display: flex;
+    flex-direction: row;
+}
+.inputRange input[type="range"]{
+   margin-right: 10px;
+}
+.inputRange input[type="number"]{
+	width: 50px;
+ }
+ .pss{
+	color: #fff;
+ }
+
+ .userInput{
+	background: #eeeeee;
+	color: #000;
+	padding: 5px;
+	border-radius: 5px;
+	width: max-content;
+	margin-top: 10px;
+}
+
+.selectionOptions{
+    padding: 5px;
+}
+
+.cbcontainer {
+	display: inline-block;
+	position: relative;
+	padding-left: 28px;
+	padding-top:1px;
+	margin: 5px 0px;
+	cursor: pointer;
+	font-size: 16px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.cbcontainer input {
+	position: absolute;
+	opacity: 0;
+	cursor: pointer;
+	height: 0;
+	width: 0;
+}
+.cbmark {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 16px;
+	width: 16px;
+	background-color: #fff;
+	border: 2px solid #336699;
+}
+.rbmark {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 16px;
+	width: 16px;
+	background-color: #fff;
+	border: 2px solid #336699;
+	border-radius: 50%;
+}
+.cbcontainer:hover input ~ .cbmark, .cbcontainer:hover input ~ .rbmark {
+	background-color: #ccc;
+}
+.cbcontainer input:checked ~ .cbmark, .cbcontainer input:checked ~ .rbmark {
+	background-color: #336699;
+}
+.cbmark:after, .rbmark:after {
+	content: "";
+	position: absolute;
+	display: none;
+}
+.cbcontainer input:checked ~ .cbmark:after, .cbcontainer input:checked ~ .rbmark:after {
+	display: block;
+}
+.cbcontainer .cbmark:after {
+	left: 4px;
+	top: 0px;
+	width: 5px;
+	height: 10px;
+	border: solid white;
+	border-width: 0 3px 3px 0;
+	-webkit-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+.cbcontainer .rbmark:after {
+	top: 4px;
+	left: 4px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: white;
+}
+
+/* copy */
+.cliptrans{
+	color: green;
+	animation-name: changing;
+	animation-duration: 2s;
+	margin-right: 20px;
+  }
+.cliptrans::before{
+content: "copied!";
+}
+
+@keyframes changing {
+from {color: green;}
+to {color: rgb(165, 245, 149);}
+}
+
+
+
+
+
+.breaker{
+clear:both;
+overflow:hidden;
+height:0;
+}
+
+.hidden{
+display:none;
+}
+.error{
+color: red;
+}
+div.generate_button{
+width:600px;
+text-align:center;
+}
+div.generate_button input{
+padding: 6px;
+clear: both;
+}
+
+
+div.char_type{
+float:right;
+margin-right: 10px;
+width:90px;
+font-size: 12px;
+color: #c2c2c2;
+} 
+.char_type_text{
+float:right; 
+} 
+.char_type_valid{
+color : #2cb117 !important;
+} 
+#char_count{
+width: 200px;
+font-weight:bold;
+bottom: 2px;
+position: relative;
+font-size:14px;
+}
+div.chars_holder{
+position:relative;
+padding-top: 13px;
+clear: both;
+}
+div.estimate{
+width:49%;
+float: left;
+border:solid 1px;
+height: 50px;
+}
+div.result{
+margin-top: 10px;
+font-size: 18px;
+border-color: #D0D0D0;
+padding-top: 15px;
+}
+.tip{
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+.col_right{
+margin-top: 5px;
+margin-bottom: 5px;
+font-size: 24px;
+}
+.small_text{
+clear:both;
+border-top: none;
+color:#ffff76;
+text-align: center;
+padding-top: 20px;
+font-weight: bold;
+margin: 5px;
+} 
