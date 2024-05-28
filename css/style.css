@@ -76,8 +76,24 @@ color: #fff;
 cursor: pointer;
 }
 
-@media only screen and (max-width: 600px){
+@media only screen and (max-width: 1000px){
+    .tool{
+        min-width: 300px;
+    }
     .toolrow {
+        width: 100%;
         flex-wrap: wrap;
     }
+}
+
+@media only screen and (max-width: 600px){
+    .toolrow {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .tool{
+        width: 100%;
+    }
   }
+
+
