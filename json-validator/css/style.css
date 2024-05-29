@@ -1,0 +1,85 @@
+.cm-error-highlight {
+    background-color:rgba(255,0,0,.2)
+  }
+  .cm-s-default .cm-string.cm-property {
+    color:#b16b2a!important;
+  }
+  .cm-s-default .cm-string {
+    color:green!important;
+  }
+  
+  
+  .bg-green-100 {
+    background-color:rgb(220,252,231);
+  }
+  .bg-red-100 {
+    background-color:rgb(254,226,226);
+  }
+  
+  .text-green-700 {
+    color:rgb(21,128,61);
+  }
+  .text-red-700 {
+    color:rgb(185 28 28)
+  }
+  
+  .px-4 {
+    padding-left:1rem;
+    padding-right:1rem
+  }
+  .py-2 {
+    padding-top:.5rem;
+    padding-bottom:.5rem
+  }
+  .mt-4 {
+    margin-top:1rem
+  }
+  .mb-2 {
+    margin-bottom:.5rem
+  }
+  .pt-1 {
+    padding-top:.25rem
+  }
+  
+  .block {
+    display:block
+  }
+  .none{
+    display: none;
+  }
+  
+  .font-semibold {
+    font-weight:600
+  }
+  .relative {
+    position:relative
+  }
+  
+  .text-xs {
+    font-size:.75rem;
+    line-height:1rem
+  }
+  .border {
+    border-width:1px
+  }
+  .border-slate-200 {
+    border-color:rgb(226 232 240)
+  }
+  .border-green-200 {
+    border-color:rgb(187 247 208)
+  }
+  .border-red-200 {
+    border-color:rgb(254 202 202)
+  }
+  .border-t {
+    border-top-width:1px
+  }
+  .border-dashed {
+    border-style:dashed
+  }
+  .border-red-300 {
+    border-color:rgb(252 165 165)
+  }
+  .text-red-700 {
+    color:rgb(185 28 28)
+  }

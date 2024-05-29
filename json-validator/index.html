@@ -1,0 +1,360 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>JSON Genie</title>
+        <meta charset="utf-8">
+        <meta name="author" content="SidPro"/>
+        <meta name="description" content="JSON Genie is your ultimate tool for effortlessly validating, formatting, and visualizing JSON data. 
+        With its intuitive and user-friendly design, you can easily paste your JSON code to receive instant feedback. The color-coded and 
+        beautifully formatted display makes navigating and understanding complex JSON objects a breeze.">
+        <meta name="keywords" content="json validator, json formator, json viewer,collegeek,visualiz json,json,validating,validator">
+        
+        
+        <!-- icons -->
+        <link rel="apple-touch-icon" sizes="57x57" href="image/icons/favicon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60" href="image/icons/favicon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="image/icons/favicon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76" href="image/icons/favicon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="image/icons/favicon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="image/icons/favicon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="image/icons/favicon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="image/icons/favicon-152x152.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="image/icons/favicon-180x180.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="image/icons/favicon-16x16.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="image/icons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="96x96" href="image/icons/favicon-96x96.png">
+        <link rel="icon" type="image/png" sizes="192x192" href="image/icons/favicon-192x192.png">
+        <link rel="shortcut icon" type="image/x-icon" href="image/icons/favicon.ico">
+        <link rel="icon" type="image/x-icon" href="image/icons/favicon.ico">
+        <meta name="msapplication-TileColor" content="#ffffff">
+        <meta name="msapplication-TileImage" content="image/icons/favicon-144x144.png">
+        <meta name="msapplication-config" content="image/icons/browserconfig.xml">
+        <link rel="manifest" href="image/icons/manifest.json">
+        <!-- icons -->
+
+        
+        <link rel="stylesheet" type="text/css" href="extjs/css/ext-gray-all.css" media="all">
+        <script type="text/javascript" src="jsonviewer-all_v7.js"></script>
+    
+        <link rel="stylesheet" href="https://codemirror.net/5/lib/codemirror.css">
+        <link rel="stylesheet" href="https://codemirror.net/5/addon/fold/foldgutter.css">
+        <script src="https://codemirror.net/5/lib/codemirror.js"></script>
+        <script src="https://codemirror.net/5/addon/fold/foldcode.js"></script>
+        <script src="https://codemirror.net/5/addon/fold/foldgutter.js"></script>
+        <script src="https://codemirror.net/5/addon/fold/brace-fold.js"></script>
+        <script src="https://codemirror.net/5/mode/javascript/javascript.js"></script>
+        <script src="https://codemirror.net/5/addon/dialog/dialog.js" ></script>
+        <script src="https://codemirror.net/5/addon/search/searchcursor.js" ></script>
+        <script src="https://codemirror.net/5/addon/search/search.js"></script>
+        <script src="https://codemirror.net/5/addon/search/jump-to-line.js" ></script>
+        <script src="https://codemirror.net/5/addon/scroll/annotatescrollbar.js" ></script>
+        <script src="https://codemirror.net/5/addon/search/matchesonscrollbar.js" ></script>
+        <script src="jsonlint2.js" ></script>
+        <link rel="stylesheet" href="css/style.css">
+
+        <style>
+          .CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}
+          .br0 {color:#090} .st0 {color:#36C} .sy0 {color:#393}
+          .CodeMirror{
+            height: 80%;
+          }
+        </style>
+        <script>
+            /*
+            * Demonstration of code folding
+            */
+          var errorMarkerRef = null;
+            window.onload = function() {
+                var te = document.getElementById("edit");
+                window.editor = CodeMirror.fromTextArea(te, {
+                    mode: { name: "javascript", json: true },
+                    lineNumbers: true,
+                    foldGutter: true,
+                    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+                    matchBrackets: true,
+                    autoCloseBrackets: true,
+                    search: true,
+                    highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true}
+                });
+                // document.getElementById("edit").addEventListener("input",()=>{
+                //   const decodedJson = decodeURIComponent(json);
+                //   setInput(decodedJson);
+                //   setTimeout(() => handleValidate(decodedJson), 0);
+                // });
+            }
+
+            function customStringify(jsonObject, pretty) {
+              let jsonString = pretty ? JSON.stringify(jsonObject, null, 4) : JSON.stringify(jsonObject)
+              jsonString = jsonString.replace(/\\\\u([\da-fA-F]{4})/g, '\\u$1').replace(/\\\//g, '/')
+
+              return jsonString
+            }
+
+  
+
+          function copyStringToClipboard(str) {
+              var cstcel = document.createElement('textarea');
+              try{
+                cstcel.value = atob(str);
+                cstcel.setAttribute('readonly', '');
+                cstcel.style = {position: 'absolute', left: '-9999px'};
+                document.body.appendChild(cstcel);
+                cstcel.select();
+                document.execCommand('copy');
+              }catch(e){
+
+              }
+              finally{
+                document.body.removeChild(cstcel);
+              }
+              return false;
+          }
+
+            const handleCopy = () => {
+              return copyStringToClipboard(btoa(editor.getDoc().getValue()));
+            }
+
+            function convertSpacesToTabs(str, spacesPerIndent) {
+                const spaceGroup = ' '.repeat(spacesPerIndent)
+                return str.split('\n').map(line => line.replace(new RegExp(`^(${spaceGroup})+`, 'g'), match => '\t'.repeat(match.length / spacesPerIndent))).join('\n')
+            }
+
+            function customCompress(jsonString) {
+                let modifiedString = jsonString.replace(/\\u([\da-fA-F]{4})/g, 'UNICODE_$1')
+                                              .replace(/\\\//g, 'SLASH')
+                try {
+                    let compressedJson = JSON.stringify(JSON.parse(modifiedString))
+                    compressedJson = compressedJson.replace(/UNICODE_([\da-fA-F]{4})/g, '\\u$1')
+                                                  .replace(/SLASH/g, '\\/')
+
+                    return compressedJson
+                } catch (error) {
+                    //console.error("Error in customCompress:", error)
+                    setError(`Failed to Compress JSON: ${error.message}`)
+                    setIsValid(false)
+                }
+            }
+
+            function getURL(url){
+              fetch(decodeURIComponent(url))
+                  .then(response => response.json())
+                  .then(data => {
+                      const fetchedJson = JSON.stringify(data, null, 4)
+                      setInput(fetchedJson)
+                      setTimeout(() => handleValidate(fetchedJson), 0)
+                  })
+                  .catch(error => {
+                      setError(`Failed to fetch JSON from URL: ${error.message}`)
+                      setIsValid(false)
+                  })
+            }
+
+            function setInput(str){
+              editor.getDoc().setValue(str);
+            }
+
+            function setError(str){
+              document.getElementById("lint-error").innerHTML = str;
+            }
+
+            function setIsValid(str){
+              if(str === true){
+                document.getElementById("json-valid").classList.add("block");
+                document.getElementById("json-invalid").classList.add("none");
+
+                document.getElementById("json-valid").classList.remove("none");
+                document.getElementById("json-invalid").classList.remove("block");
+              }
+              else if(str === false){
+                document.getElementById("json-valid").classList.add("none");
+                document.getElementById("json-invalid").classList.add("block");
+
+                document.getElementById("json-valid").classList.remove("block");
+                document.getElementById("json-invalid").classList.remove("none");
+              }
+              else{
+                document.getElementById("json-valid").classList.add("none");
+                document.getElementById("json-invalid").classList.add("none");
+                document.getElementById("json-valid").classList.remove("block");
+                document.getElementById("json-invalid").classList.remove("block");
+              }
+            }
+
+            const handleValidateLite = (jsonToValidate = editor.getDoc().getValue()) => {
+              let parsed = null;
+              if (errorMarkerRef) {
+                errorMarkerRef.clear();
+                errorMarkerRef = null;
+              }
+
+              try {
+                parsed = jsonlint.parse(jsonToValidate)
+                
+              } catch (e) {
+                  setError(e.toString())
+                  setIsValid(false)
+                  const match = e.toString().match(/line (\d+)/)
+                  if (match) {
+                    const lineNumber = parseInt(match[1], 10) - 1
+                    errorMarkerRef = editor.getDoc().markText(
+                      { line: lineNumber, ch: 0 },
+                      { line: lineNumber + 1, ch: 0 },
+                      { className: 'cm-error-highlight' }
+                    )
+                  }
+                }
+                return parsed;
+              }
+
+            const handleValidate = (jsonToValidate = editor.getDoc().getValue()) => {
+              if (errorMarkerRef) {
+                errorMarkerRef.clear();
+                errorMarkerRef = null;
+              }
+
+              try {
+                const parsed = jsonlint.parse(jsonToValidate)
+                const indentedJson = customStringify(parsed, true)
+                setInput(indentedJson)
+                setError('')
+                setIsValid(true)
+              } catch (e) {
+                  setError(e.toString())
+                  setIsValid(false)
+                  const match = e.toString().match(/line (\d+)/)
+                  if (match) {
+                    const lineNumber = parseInt(match[1], 10) - 1
+                    errorMarkerRef = editor.getDoc().markText(
+                      { line: lineNumber, ch: 0 },
+                      { line: lineNumber + 1, ch: 0 },
+                      { className: 'cm-error-highlight' }
+                    )
+                  }
+                }
+              }
+
+              const handleFormatting = (input = true) => {
+                try {
+                    let formattedJson
+                    if (input) {
+                        formattedJson = customStringify(jsonlint.parse(editor.getDoc().getValue()), true)
+                  formattedJson = convertSpacesToTabs(formattedJson, 4)
+                    } else {
+                        formattedJson = customCompress(editor.getDoc().getValue());
+                    }
+                    setInput(formattedJson)
+                } catch (error) {
+                    setError(`Failed to format JSON: ${error.message}`)
+                }
+              }
+
+              const handleClear = () => {   
+                setInput('')
+                setError('')
+                setIsValid(null)
+              }
+        </script>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-3EWCZHDCG9"></script>
+        <script src="https://kit.fontawesome.com/5e8f32d58e.js" crossorigin="anonymous" defer></script>
+        <link rel="stylesheet" href="css/footer.css">
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-3EWCZHDCG9');
+        </script>
+    </head>
+    <body>
+
+        <h1>JSON Genie</h1>
+
+        <div class="tab">
+            <h2>About JSON</h2>
+            <div>
+                <b>JSON</b>, short for <b>JavaScript Object Notation</b>, is a lightweight computer data interchange format. JSON is a text-based, human-readable format for representing simple data structures and associative arrays (called objects).<br/><br/>
+                Read more: <a href="http://json.org" target="_blank">json.org</a>, <a href="http://en.wikipedia.org/wiki/JSON" target="_blank">wikipedia</a>, <a href="http://www.google.com/search?q=json" target="_blank">google</a><br/><br/>
+                <h3>In JSON, they take on the following forms: object, array, value, string and number</h3>
+            </div>
+        </div>
+
+        <div class="tab">
+            <h2>Example</h2>
+        <div>
+
+        <pre><span class="br0">{</span>
+            <span class="st0">"firstName"</span><span class="sy0">:</span> <span class="st0">"Aditi"</span><span class="sy0">,</span>
+            <span class="st0">"lastName"</span><span class="sy0">:</span> <span class="st0">"Agarwal"</span><span class="sy0">,</span>
+            <span class="st0">"gender"</span><span class="sy0">:</span> <span class="st0">"female"</span><span class="sy0">,</span>
+            <span class="st0">"age"</span><span class="sy0">:</span> <span class="st0">23</span><span class="sy0">,</span>
+            <span class="st0">"address"</span><span class="sy0">:</span> <span class="br0">{</span>
+                <span class="st0">"streetAddress"</span><span class="sy0">:</span> <span class="st0">"C 41, Room No 12, Middle Circle, Connaught Place"</span><span class="sy0">,</span>
+                <span class="st0">"city"</span><span class="sy0">:</span> <span class="st0">"Delhi"</span><span class="sy0">,</span>
+                <span class="st0">"state"</span><span class="sy0">:</span> <span class="st0">"Delhi"</span><span class="sy0">,</span>
+                <span class="st0">"postalCode"</span><span class="sy0">:</span> <span class="st0">"110001"</span>
+            <span class="br0">}</span><span class="sy0">,</span>
+            <span class="st0">"phoneNumbers"</span><span class="sy0">:</span> <span class="br0">[</span>
+                <span class="br0">{</span> <span class="st0">"type"</span><span class="sy0">:</span> <span class="st0">"home"</span><span class="sy0">,</span> <span class="st0">"number"</span><span class="sy0">:</span> <span class="st0">"01123417459"</span> <span class="br0">}</span><span class="sy0">,</span>
+                <span class="br0">{</span> <span class="st0">"type"</span><span class="sy0">:</span> <span class="st0">"fax"</span><span class="sy0">,</span> <span class="st0">"number"</span><span class="sy0">:</span> <span class="st0">"05127525751"</span> <span class="br0">}</span>
+            <span class="br0">]</span>
+        <span class="br0">}</span></pre>
+
+            </div>
+        </div>
+
+        <div class="tab">
+            <h2>About JSON Genie</h2>
+            <div>
+               JSON Genie is your ultimate tool for effortlessly validating, formatting, and visualizing 
+               JSON data. With its intuitive and user-friendly design, you can easily paste your JSON code to receive instant feedback. 
+               The color-coded and beautifully formatted display makes navigating and understanding complex JSON objects a breeze.<br/><br>
+                The application is using <a href="http://extjs.com" target="_blank">Ext JS</a>, <a href="https://www.npmjs.com/package/react-codemirror2" target="_blank">react-codemirror2</a><br/><br>
+                For any questions or problems please <a href="mailto:collegeekonline@gmail.com">collegeekonline@gmail.com</a><br/><br>
+                <div class="ft">
+                    <footer>
+                      <div class="ft-container">
+                        <div class="sec aboutus">
+                          <h2>About JSON Genie</h2>
+                          <p>JSON Genie is your ultimate tool for effortlessly validating, formatting, and visualizing JSON data.</p>
+                          <ul class="sci">
+                            <li><a href="https://www.instagram.com/collegeekonline/" target="_blank"><i class="fab fa-instagram"></i></a></li>
+                          </ul>
+                        </div>
+                        <div class="sec quickLinks">
+                          <h2>Quick Links</h2>
+                          <ul>
+                            <li><a href="https://cpp-collegeek.herokuapp.com/" target="_blank">Online Compiler</a></li>
+                            <li><a href="https://linkshare.collegeek.com/" target="_blank">LinkShare</a></li>
+                            <li><a href="https://collegeek.com/Live_DHTML/index.html" target="_blank">Live Editor</a></li>
+                            <li><a href="https://collegeek.com/privecypolicy.html" target="_blank">Privacy Policy</a></li>
+                            <li><a href="https://collegeek.com/Termsandcondition.html" target="_blank">Terms & Conditions</a></li>
+                          </ul>
+                        </div>
+                        <div class="sec ft-contact">
+                          <h2>Contact Info</h2>
+                          <ul class="info">
+                            <li>
+                              <span><i class="fas fa-map-marker-alt"></i></span>
+                              <span>80 Feet Road, Anand Bagh, <br>Surendranagar, Gujarat <br>363001</span>
+                            </li>
+                            <li>
+                              <span><i class="fas fa-envelope"></i></span>
+                              <span><a href="mailto:collegeekonline@gmail.com">collegeekonline@gmail.com</a></span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </footer>
+                    <div class="copyrightText">
+                      <p style="margin-bottom: 50px;text-align: center;">
+                        © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+                     <p>
+                    </div>
+                  </div>
+            </div>
+        </div>
+        
+        
+    </body>
+</html>
