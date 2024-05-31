@@ -39,7 +39,7 @@ body{
     box-shadow: 0 30px 30px -25px rgba(65, 51, 183, 0.25);
     background-color: #fff;
     padding: 1.5rem;
-    width: 25%;
+    width: 300px;
 }
 
 .tool .title {
