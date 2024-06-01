@@ -126,7 +126,11 @@ label#uploadLabel:hover {
 
 
 
-
+#demo-content {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
 
 #demo-instructions {
 	display: none;
@@ -208,7 +212,33 @@ label#uploadLabel:hover {
 	}
 
 	#arrow::before {
-		content: '\2192';
+		content: '\2193';
+  }
+  #input, #input-overlay {
+    max-width: 37.5em;
+    box-sizing: border-box;
+    padding: 20px;
+    height: auto;
+    margin-top: 0;
+  }
+  #log{
+    font-size: 15px;
+    max-width: 37.5em;
+  }
+  #log .status {
+    min-width: 170px;
+  }
+
+}
+
+@media only screen and (max-width: 900px) {	
+	#demo-content {
+		display: flex;
+		align-items: center;
+	}
+
+	#arrow::before {
+		content: '\2193';
   }
   #input, #input-overlay {
     max-width: 100vw;

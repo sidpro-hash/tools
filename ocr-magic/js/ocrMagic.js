@@ -93,10 +93,28 @@ var dimensions = {
 }
 
 
-
-const workerPromise = Tesseract.createWorker('eng', 1, {
+try{
+var workerPromise = Tesseract.createWorker('eng', 1, {
 	logger: progressUpdate,
+}).catch(error => {
+	// Handle and display the error
+	showError("Unable to load Tesseract. Check your network connection");
 });
+}catch(e){
+	showError(e);
+}
+
+function showError(error){
+	var log = document.getElementById('log');
+	var line = document.createElement('div');
+	line.status = error.message;
+	var status = document.createElement('div');
+	status.className = 'status';
+	status.appendChild(document.createTextNode("Check your network connection"));
+	line.appendChild(status);
+	log.insertBefore(line, log.firstChild);
+	console.error("Error creating Tesseract worker:", error);
+}
 
 function progressUpdate(packet){
 	var log = document.getElementById('log');
