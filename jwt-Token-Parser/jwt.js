@@ -1,15 +1,41 @@
 function parseJwt(token) {
     try{
-        var base64Url = token.split('.')[1];
-        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
+        let splitted = token.split('.');
+        let Header = null, Payload = null, signature = null;
+        if(splitted.length >= 1){
+            Header = Json(splitted[0].trim());
+        }
+        if(splitted.length >= 2){
+            Payload = Json(splitted[1].trim());
+        }
+        // if(splitted.length >= 3){
+        //     signature = Json(splitted[2].trim());
+        // }
+        let jsonPayload = {
+            "Header": Header,
+            "Payload": Payload,
+            "signature": signature
+        }
+        //return JSON.parse(JSON.stringify(jsonPayload));
+        return jsonPayload;
     }catch(e){
         console.log(e);
         return null;
     }
+}
+
+function Json(data){
+    let jsonPayload = null;
+    if(!data)return jsonPayload;
+    try{
+        let base64 = data.replace(/-/g, '+').replace(/_/g, '/');
+        jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    }catch(e){
+        console.log(e);
+    }
+    return jsonPayload;
 }
 
 textareaElement = document.getElementById("textarea");
@@ -22,8 +48,16 @@ textareaElement.addEventListener("input", function(event) {
 
 function startParser(){
     var mytext = textareaElement.value; //You already have the element as a variable
-    var j = parseJwt(mytext);
-    if(j){
+    let jsonPayload = parseJwt(mytext);
+    let result = document.getElementById("result");
+    result.innerHTML = '';
+    if(jsonPayload.Header){
+        let j = JSON.parse(jsonPayload.Header);
+        output("Header:</br>",syntaxHighlight(JSON.stringify(j,null," ")));
+    }
+
+    if(jsonPayload.Payload){
+        let j = JSON.parse(jsonPayload.Payload);
         if(j.exp){
             var expTime = j.exp * 1000;
             var expDate = new Date(expTime);// Milliseconds to date
@@ -32,19 +66,20 @@ function startParser(){
         else{
             document.getElementById("d").innerHTML="</br></br>PAYLOAD_DATA:</br>";
         }
-        output(syntaxHighlight(JSON.stringify(j,null," ")));
+        
+        output("Payload:</br>",syntaxHighlight(JSON.stringify(j,null," ")));
     }
-    else{
-        let result = document.getElementById("result");
-    result.innerHTML = '';
-        document.getElementById("d").innerHTML = '<code style="color:red">Invalid JWT Token</code>';
+
+    if(jsonPayload.signature){
+        let j = JSON.parse(jsonPayload.signature);
+        output("signature:</br>",syntaxHighlight(JSON.stringify(j,null," ")));
     }
+    
 }
 
-function output(inp) {
+function output(title,inp) {
     let result = document.getElementById("result");
-    result.innerHTML = '';
-    result.appendChild(document.createElement('pre')).innerHTML = inp;
+    result.appendChild(document.createElement('pre')).innerHTML = title + inp;
 }
 
 function syntaxHighlight(json) {
