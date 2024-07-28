@@ -74,6 +74,8 @@
                 let m2 = toDate.getMonth() + 1;
                 let y2 = toDate.getFullYear();
 
+                let diffIn = dateDiffInDays(fromDate,toDate);
+
                 let d3,m3,y3;
 
                 y3 = y2 - y1;
@@ -97,13 +99,34 @@
                     y3--;
                 }
 
-                result.innerHTML = `<span>${y3}</span> years <span>${m3}</span> months <span>${d3}</span> days`;
-
+                result.innerHTML = `<span>${y3}</span> years <span>${m3}</span> months <span>${d3}</span> days
+                <br/> or <span>${diffIn.DAY}</span> days
+                <br/> or <span>${diffIn.HOUR}</span> hours
+                <br/> or <span>${diffIn.MINUTE}</span> minutes
+                <br/> or <span>${diffIn.SECOND}</span> seconds`;
             }
 
             function getDaysInMonth(year, month){
                 return new Date(year, month, 0).getDate();
             }
+
+            function dateDiffInDays(a, b) {
+                const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+                const _MS_PER_HOUR = 1000 * 60 * 60;
+                const _MS_PER_MINUTE = 1000 * 60;
+                const _MS_PER_SECOND = 1000;
+                // Discard the time and time-zone information.
+                const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+                const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+
+                return {
+                    "DAY":Math.floor((utc2 - utc1) / _MS_PER_DAY).toLocaleString(undefined, { minimumFractionDigits: 0 }),
+                    "HOUR":Math.floor((utc2 - utc1) / _MS_PER_HOUR).toLocaleString(undefined, { minimumFractionDigits: 0 }),
+                    "MINUTE":Math.floor((utc2 - utc1) / _MS_PER_MINUTE).toLocaleString(undefined, { minimumFractionDigits: 0 }),
+                    "SECOND":Math.floor((utc2 - utc1) / _MS_PER_SECOND).toLocaleString(undefined, { minimumFractionDigits: 0 })
+                };
+            }
+
         </script>
     </body>
 </html>
