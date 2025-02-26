@@ -8,37 +8,42 @@
 
 <url>
   <loc>https://tools.collegeek.com/</loc>
-  <lastmod>2024-05-28T07:04:16+00:00</lastmod>
+  <lastmod>2025-02-01T09:21:42+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://tools.collegeek.com/random-password-generator/index.html</loc>
-  <lastmod>2024-05-28T07:04:16+00:00</lastmod>
+  <loc>https://tools.collegeek.com/json-validator/index.html</loc>
+  <lastmod>2025-02-01T09:21:42+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://tools.collegeek.com/ocr-magic/index.html</loc>
-  <lastmod>2024-05-28T07:04:16+00:00</lastmod>
+  <lastmod>2025-02-01T09:21:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://tools.collegeek.com/pdfeditor/index.html</loc>
+  <lastmod>2025-02-01T09:21:42+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://tools.collegeek.com/jwt-Token-Parser/index.html</loc>
-  <lastmod>2024-05-28T07:04:16+00:00</lastmod>
+  <lastmod>2025-02-01T09:21:42+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://tools.collegeek.com/Live-DHTML-Simulator/index.html</loc>
-  <lastmod>2024-05-28T07:04:16+00:00</lastmod>
+  <lastmod>2025-02-01T09:21:42+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://tools.collegeek.com/age-calculator/index.html</loc>
-  <lastmod>2024-05-28T07:04:16+00:00</lastmod>
+  <lastmod>2025-02-01T09:21:42+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://tools.collegeek.com/json-validator/index.html</loc>
-  <lastmod>2024-05-29T07:04:16+00:00</lastmod>
+  <loc>https://tools.collegeek.com/random-password-generator/index.html</loc>
+  <lastmod>2025-02-01T09:21:42+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 
