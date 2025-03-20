@@ -11,8 +11,7 @@ const state = {
     loading: false
 };
 
-const controlClasses = ["control-split", "control-merge", "control-extract"];
-const controlButtons = ["merge-button", "split-button", "extract-button"];
+const controlClasses = ["control-split", "control-merge", "control-extract", "control-pdf-to-image"];
 
 // DOM Elements
 const dropZone = document.getElementById('drop-zone');
@@ -21,6 +20,7 @@ const fileList = document.getElementById('file-list');
 const mergeButton = document.getElementById('merge-button');
 const clearButton = document.getElementById('clear-button');
 const splitButton = document.getElementById('split-button');
+const pdfToImageButton = document.getElementById('pdf-to-image-button');
 const pageTitle = document.getElementById('page-title');
 // Toggle the sidebar (navbar) on mobile
 const hamburgerIcon = document.getElementById('hamburger-icon');
@@ -91,6 +91,7 @@ function updateButtons() {
     mergeButton.disabled = state.files.length < 2;
     clearButton.disabled = state.files.length == 0;
     splitButton.disabled = state.files.length != 1;
+    pdfToImageButton.disabled = state.files.length != 1;
 }
 
 function clearFiles() {
@@ -157,7 +158,11 @@ function showHideById(id, showStyle)
     document.getElementById(id).style.display = showStyle;
 }
 
-function changeOption(option) {
+function changeOption(option, event) {
+    if(document.querySelector('.sidebarOptions > li.active') !== null){
+        document.querySelector('.sidebarOptions > li.active').classList.remove('active');
+      }
+      event.target.className = "active";
     // Change page title based on selected option
     clearFiles();
     document.getElementById('output').innerHTML = '';
@@ -174,6 +179,9 @@ function changeOption(option) {
     } else if (option === 'extract') {
         pageTitle.textContent = 'Extract Text';
         showHideByClassName('control-extract',true);
+    } else if (option === 'pdfToImage') {
+        pageTitle.textContent = 'PDF To Image';
+        showHideByClassName('control-pdf-to-image',true);
     }
 }
 
@@ -293,6 +301,7 @@ const searchButton = document.getElementById('search-button');
 extractButton.addEventListener('click', extractText);
 copyButton.addEventListener('click', copyText);
 searchButton.addEventListener('click', searchText);
+pdfToImageButton.addEventListener('click', convertPDFToImage);
 
 async function prepareFileExtract() {
     if (state.files.length != 1) return;
@@ -370,4 +379,87 @@ function searchText() {
     textOutput.innerHTML = highlightedText;
 }
 
-changeOption('merge');
+async function convertPDFToImage() {
+    state.loading = true;
+    showProcessing(true);
+
+    const file = state.files[0];
+
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+        const numPages = pdf.numPages;
+        console.log(`Total pages: ${numPages}`);
+
+        const pagePromises = [];
+
+        for (let pageNumber = 1; pageNumber <= numPages; pageNumber++) {
+            const page = await pdf.getPage(pageNumber);
+            const scale = 2; // You can adjust the scale factor here for higher resolution
+            const viewport = page.getViewport({ scale: scale });
+
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            const imagePromise = new Promise((resolve) => {
+                page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise.then(() => {
+                    const img = new Image();
+                    img.src = canvas.toDataURL();
+
+                    resolve(img.src);
+                });
+            });
+
+            pagePromises.push(imagePromise);
+        }
+
+        const images = await Promise.all(pagePromises);
+
+        if (images.length === 1) {
+            downloadImage(images[0]);
+        } else {
+            await createZip(images);
+        }
+
+    } catch (error) {
+        console.error('Error while rendering PDF:', error);
+    } finally {
+        state.loading = false;
+        pdfToImageButton.disabled = false;
+        showProcessing(false);
+        clearFiles();
+    }
+}
+
+async function createZip(images) {
+    const zip = new JSZip();
+
+    images.forEach((imageDataUrl, index) => {
+        const imageName = `image_${index + 1}.png`; // Name each image differently
+        const imageData = imageDataUrl.split(',')[1]; // Get the base64 part of the data URL
+        zip.file(imageName, imageData, { base64: true });
+    });
+
+    // Generate the zip file and trigger download
+    zip.generateAsync({ type: "blob" }).then(function(content) {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = "images.zip";
+        link.click();
+    });
+}
+
+function downloadImage(imageDataUrl) {
+    const link = document.createElement("a");
+    link.href = imageDataUrl;
+    link.download = "image.png"; // Name the image file
+    link.click();
+}
+
+document.getElementById('merge-option').click();

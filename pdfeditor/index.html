@@ -39,14 +39,17 @@
             <i class="fas fa-bars"></i> 
         </button>PDF Editor</h2>
         <ul class="sidebarOptions">
-            <li id="merge-option" onclick="changeOption('merge')">
+            <li id="merge-option" onclick="changeOption('merge', event)">
                 <i class="fas fa-compress"></i> Merge PDFs
             </li>
-            <li id="split-option" onclick="changeOption('split')">
+            <li id="split-option" onclick="changeOption('split', event)">
                 <i class="fas fa-columns"></i> Split PDFs
             </li>
-            <li id="extract-option" onclick="changeOption('extract')">
+            <li id="extract-option" onclick="changeOption('extract', event)">
                 <i class="fas fa-file-alt"></i> Extract Text
+            </li>
+            <li id="pdf-to-image-option" onclick="changeOption('pdfToImage', event)">
+                <i class="fas fa-file-image"></i> PDF to Image
             </li>
         </ul>
     </div>
@@ -87,6 +90,7 @@
         <div>
             <span class="control-merge"><button id="merge-button" disabled>Merge PDFs</button></span>
             <span class="control-split"><button id="split-button" disabled>Split PDF</button></span>
+            <span class="control-pdf-to-image"><button id="pdf-to-image-button" disabled>PDF To Image</button></span>
             <button id="clear-button" disabled>Clear All</button>
         </div>
 

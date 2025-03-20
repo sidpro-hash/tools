@@ -150,6 +150,9 @@ button:disabled {
     height: 100%;
     overflow: auto;
 }
+.active{
+    background-color: #6e61e5;
+}
 .sidebar h2 {
     text-align: center;
 }
