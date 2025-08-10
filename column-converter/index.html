@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Column Converter</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="SidPro"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta name="description" content="Transform your data columns into comma separated lists."/>
+    <meta name="keywords" content="Column Converter,comma separated,"/>
+    <!-- icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+    <link rel="manifest" href="../icons/manifest.json" />
+    <!-- icons -->
+    <link href="style.css" rel="stylesheet" type="text/css" charset="utf-8" />
+</head>
+<body>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Column Converter</h1>
+            <p class="subtitle">Transform your data columns into comma-separated lists</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label class="control-label">Delimiter</label>
+                <input type="text" class="control-input" id="delimiter" value="," placeholder="Enter delimiter">
+            </div>
+            <div class="control-group">
+                <label class="control-label">Item Prefix</label>
+                <input type="text" class="control-input" id="itemPrefix" value="'" placeholder="Prefix for each item">
+            </div>
+            <div class="control-group">
+                <label class="control-label">Item Suffix</label>
+                <input type="text" class="control-input" id="itemSuffix" value="'" placeholder="Suffix for each item">
+            </div>
+            <div class="control-group">
+                <label class="control-label">Result Prefix</label>
+                <input type="text" class="control-input" id="resultPrefix" value="(" placeholder="Start of result">
+            </div>
+            <div class="control-group">
+                <label class="control-label">Result Suffix</label>
+                <input type="text" class="control-input" id="resultSuffix" value=")" placeholder="End of result">
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <h3 class="section-title">
+                    <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M8 16.5a1.5 1.5 0 01-3 0V9.75a1.5 1.5 0 013 0v6.75zM15 16.5a1.5 1.5 0 01-3 0V4.25a1.5 1.5 0 013 0v12.25z"/>
+                    </svg>
+                    Input Column
+                </h3>
+                <textarea class="textarea" id="inputText" placeholder="Paste your column data here...&#10;&#10;Example:&#10;Apple&#10;Banana&#10;Cherry&#10;Date&#10;Elderberry"></textarea>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="clearInput()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                            <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                        </svg>
+                        Clear
+                    </button>
+                    <!--<button class="btn btn-primary" onclick="loadSample()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3zM8 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V4zM8 15a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-1z"/>
+                        </svg>
+                        Sample Data
+                    </button>-->
+                </div>
+                <div class="stats">
+                    <div class="stats-item">
+                        <span class="stats-label">Lines:</span>
+                        <span class="stats-value" id="lineCount">0</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-label">Characters:</span>
+                        <span class="stats-value" id="charCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow-container">
+                <div class="arrow" onclick="convertData()">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h3 class="section-title">
+                    <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    Comma Separated List
+                </h3>
+                <textarea class="textarea output" id="outputText" readonly placeholder="Your converted result will appear here..."></textarea>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="copyOutput()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                            <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                        </svg>
+                        Copy Result
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearOutput()">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                        Clear
+                    </button>
+                </div>
+                <div class="stats">
+                    <div class="stats-item">
+                        <span class="stats-label">Items:</span>
+                        <span class="stats-value" id="itemCount">0</span>
+                    </div>
+                    <div class="stats-item">
+                        <span class="stats-label">Length:</span>
+                        <span class="stats-value" id="outputLength">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style=" display: flex;
+            align-items: center;
+            justify-content: center;">
+                <p style="margin-top: 50px;margin-bottom: 20px;text-align: center; ">
+                    © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+                </p>    
+            </div>
+    </div>
+
+    <div class="toast" id="toast">Copied to clipboard!</div>
+        
+    <script>
+
+
+        // Convert column data to comma separated list
+        function convertData() {
+            const inputText = document.getElementById('inputText').value;
+            const delimiter = document.getElementById('delimiter').value;
+            const itemPrefix = document.getElementById('itemPrefix').value;
+            const itemSuffix = document.getElementById('itemSuffix').value;
+            const resultPrefix = document.getElementById('resultPrefix').value;
+            const resultSuffix = document.getElementById('resultSuffix').value;
+
+            if (!inputText.trim()) {
+                showToast('Please enter some data first!', 'error');
+                return;
+            }
+
+            const lines = inputText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+
+            const formattedItems = lines.map(line => `${itemPrefix}${line}${itemSuffix}`);
+            const result = `${resultPrefix}${formattedItems.join(delimiter)}${resultSuffix}`;
+
+            document.getElementById('outputText').value = result;
+            updateStats();
+            
+            // Add animation effect
+            const outputTextarea = document.getElementById('outputText');
+            outputTextarea.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                outputTextarea.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Copy output to clipboard
+        async function copyOutput() {
+            const outputText = document.getElementById('outputText').value;
+            
+            if (!outputText) {
+                showToast('Nothing to copy!', 'error');
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(outputText);
+                showToast('Copied to clipboard!', 'success');
+            } catch (err) {
+                // Fallback for older browsers
+                const textarea = document.getElementById('outputText');
+                textarea.select();
+                document.execCommand('copy');
+                showToast('Copied to clipboard!', 'success');
+            }
+        }
+
+        // Clear input
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            updateStats();
+        }
+
+        // Clear output
+        function clearOutput() {
+            document.getElementById('outputText').value = '';
+            updateStats();
+        }
+
+        // Load sample data
+        function loadSample() {
+            const sampleData = "Apple\nBanana\nCherry\nDate\nElderberry\nFig\nGrape\nHoneydew";
+            document.getElementById('inputText').value = sampleData;
+            updateStats();
+            convertData();
+        }
+
+        // Update statistics
+        function updateStats() {
+            const inputText = document.getElementById('inputText').value;
+            const outputText = document.getElementById('outputText').value;
+
+            const lines = inputText.split('\n').filter(line => line.trim().length > 0);
+            const items = outputText ? lines.length : 0;
+
+            document.getElementById('lineCount').textContent = lines.length;
+            document.getElementById('charCount').textContent = inputText.length;
+            document.getElementById('itemCount').textContent = items;
+            document.getElementById('outputLength').textContent = outputText.length;
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Real-time conversion
+        function setupRealTimeConversion() {
+            const inputText = document.getElementById('inputText');
+            const controls = ['delimiter', 'itemPrefix', 'itemSuffix', 'resultPrefix', 'resultSuffix'];
+            
+            inputText.addEventListener('input', () => {
+                updateStats();
+                if (inputText.value.trim()) {
+                    convertData();
+                }
+            });
+
+            controls.forEach(controlId => {
+                document.getElementById(controlId).addEventListener('input', () => {
+                    if (inputText.value.trim()) {
+                        convertData();
+                    }
+                });
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            setupRealTimeConversion();
+            updateStats();
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 'Enter':
+                            e.preventDefault();
+                            convertData();
+                            break;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
