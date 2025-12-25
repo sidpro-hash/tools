@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Image Inspector</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="SidPro"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta name="description" content="Professional pixel-perfect image inspection tool with real-time color picker, coordinate tracking, and high-precision zoom. Analyze images with HEX, RGB, RGBA, HSL, HSV color formats. Free online tool for designers and developers.">
+    <meta name="keywords" content="image inspector, pixel inspector, color picker, eyedropper tool, pixel color picker, image analysis, color extractor, hex color picker, rgb color picker, image zoom tool, pixel coordinate tracker, web design tool, developer tools, image color analysis, magnifier tool, online image inspector, pixel perfect tool, color format converter, image dimension analyzer, graphic design tool">
+    <!-- icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+    <link rel="manifest" href="../icons/manifest.json" />
+    <!-- icons -->
+    <!-- Google Fonts - Using distinctive typography -->
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"> -->
+    <link href="style.css" rel="stylesheet" type="text/css" charset="utf-8" /> 
+</head>
+<body>
+    <div class="app-container">
+        <!-- ============================================
+             HEADER SECTION
+             ============================================ -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo">🔍 Image Inspector</div>
+                <!-- <span class="version-badge">v1.0 PRO</span> -->
+            </div>
+            
+            <div class="toolbar">
+                <button class="btn btn-primary" id="uploadBtn">
+                    <span>📁</span>
+                    <span>Load Image</span>
+                </button>
+                <input type="file" id="imageInput" accept="image/*">
+                
+                <button class="btn" id="resetBtn" title="Reset View">
+                    <span>↺</span>
+                    <span>Reset</span>
+                </button>
+                
+                <button class="btn btn-icon" id="downloadBtn" title="Download Image">
+                    <span>💾</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ============================================
+             MAIN CONTENT AREA
+             ============================================ -->
+        <div class="main-content">
+            <!-- Canvas Container -->
+            <div class="canvas-container">
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">🖼️</div>
+                    <h2 class="empty-state-title">Ready to Inspect</h2>
+                    <p class="empty-state-text">Load an image to start analyzing pixels</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('uploadBtn').click()">
+                        <span>📁</span>
+                        <span>Choose Image</span>
+                    </button>
+                </div>
+
+                <!-- Canvas Wrapper -->
+                <div class="canvas-wrapper hidden" id="canvasWrapper">
+                    <canvas id="mainCanvas"></canvas>
+                    
+                    <!-- Crosshair Cursor -->
+                    <div class="crosshair" id="crosshair">
+                        <div class="crosshair-line crosshair-horizontal"></div>
+                        <div class="crosshair-line crosshair-vertical"></div>
+                        <div class="crosshair-center"></div>
+                    </div>
+                </div>
+
+                <!-- Magnifier Loupe -->
+                <div class="magnifier" id="magnifier">
+                    <canvas id="magnifierCanvas"></canvas>
+                </div>
+
+                <!-- Zoom Controls -->
+                <div class="zoom-controls">
+                    <button class="zoom-btn" id="zoomIn" title="Zoom In">+</button>
+                    <div class="zoom-display" id="zoomDisplay">100%</div>
+                    <button class="zoom-btn" id="zoomOut" title="Zoom Out">−</button>
+                    <button class="zoom-btn" id="resetZoom" title="Reset Zoom">⊡</button>
+                </div>
+            </div>
+
+            <!-- ============================================
+                 SIDEBAR PANEL
+                 ============================================ -->
+            <aside class="sidebar" id="sidebar">
+                <!-- Color Picker Panel -->
+                <div class="panel">
+                    <h3 class="panel-title">🎨 Color Inspector</h3>
+                    
+                    <div class="color-preview-large">
+                        <div class="color-fill" id="colorPreview" style="background: #000000;"></div>
+                    </div>
+                    
+                    <div class="color-values-grid">
+                        <div class="color-value-row" onclick="copyToClipboard(this, 'hex')" data-format="hex">
+                            <span class="color-value-label">HEX</span>
+                            <span class="color-value-text">
+                                <span id="hexValue">#000000</span>
+                                <span class="copy-icon">📋</span>
+                            </span>
+                        </div>
+                        
+                        <div class="color-value-row" onclick="copyToClipboard(this, 'rgb')" data-format="rgb">
+                            <span class="color-value-label">RGB</span>
+                            <span class="color-value-text">
+                                <span id="rgbValue">rgb(0, 0, 0)</span>
+                                <span class="copy-icon">📋</span>
+                            </span>
+                        </div>
+                        
+                        <div class="color-value-row" onclick="copyToClipboard(this, 'rgba')" data-format="rgba">
+                            <span class="color-value-label">RGBA</span>
+                            <span class="color-value-text">
+                                <span id="rgbaValue">rgba(0, 0, 0, 1)</span>
+                                <span class="copy-icon">📋</span>
+                            </span>
+                        </div>
+                        
+                        <div class="color-value-row" onclick="copyToClipboard(this, 'hsl')" data-format="hsl">
+                            <span class="color-value-label">HSL</span>
+                            <span class="color-value-text">
+                                <span id="hslValue">hsl(0, 0%, 0%)</span>
+                                <span class="copy-icon">📋</span>
+                            </span>
+                        </div>
+                        
+                        <div class="color-value-row" onclick="copyToClipboard(this, 'hsv')" data-format="hsv">
+                            <span class="color-value-label">HSV</span>
+                            <span class="color-value-text">
+                                <span id="hsvValue">hsv(0, 0%, 0%)</span>
+                                <span class="copy-icon">📋</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coordinate Panel -->
+                <div class="panel">
+                    <h3 class="panel-title">📍 Coordinates</h3>
+                    
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="info-label">X Position</div>
+                            <div class="info-value" id="xCoord">0</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label">Y Position</div>
+                            <div class="info-value" id="yCoord">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Statistics Panel -->
+                <div class="panel">
+                    <h3 class="panel-title">📊 Image Info</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Width</div>
+                            <div class="stat-value" id="imgWidth">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Height</div>
+                            <div class="stat-value" id="imgHeight">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Size</div>
+                            <div class="stat-value" id="imgSize">0 KB</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Format</div>
+                            <div class="stat-value" id="imgFormat">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tools Panel -->
+                <div class="panel">
+                    <h3 class="panel-title">🛠️ Tools</h3>
+                    
+                    <div class="toggle-group">
+                        <label class="toggle-item">
+                            <input type="checkbox" id="crosshairToggle" checked>
+                            <div class="toggle-switch"></div>
+                            <span class="toggle-label">Crosshair</span>
+                        </label>
+                        
+                        <label class="toggle-item">
+                            <input type="checkbox" id="magnifierToggle" checked>
+                            <div class="toggle-switch"></div>
+                            <span class="toggle-label">Magnifier</span>
+                        </label>
+                    </div>
+                </div>
+            </aside>
+        </div>
+        <div style=" display: flex;
+            align-items: center;
+            justify-content: center;">
+                <p style="margin-top: 50px;margin-bottom: 20px;text-align: center; ">
+                    © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+                </p>    
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ============================================
+         JAVASCRIPT APPLICATION LOGIC
+         ============================================ -->
+    <script>
+        // ============================================
+        // Application State
+        // ============================================
+        const state = {
+            image: null,
+            scale: 1,
+            offsetX: 0,
+            offsetY: 0,
+            isDragging: false,
+            dragStartX: 0,
+            dragStartY: 0,
+            minScale: 0.1,
+            maxScale: 20,
+            currentColor: { r: 0, g: 0, b: 0, a: 255 },
+            imageFile: null,
+            cursorX: 0,
+            cursorY: 0,
+            keyboardControlActive: false
+        };
+
+        // ============================================
+        // DOM Elements
+        // ============================================
+        const elements = {
+            canvas: document.getElementById('mainCanvas'),
+            ctx: null,
+            magnifierCanvas: document.getElementById('magnifierCanvas'),
+            magnifierCtx: null,
+            canvasWrapper: document.getElementById('canvasWrapper'),
+            emptyState: document.getElementById('emptyState'),
+            imageInput: document.getElementById('imageInput'),
+            uploadBtn: document.getElementById('uploadBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            zoomIn: document.getElementById('zoomIn'),
+            zoomOut: document.getElementById('zoomOut'),
+            resetZoom: document.getElementById('resetZoom'),
+            zoomDisplay: document.getElementById('zoomDisplay'),
+            crosshair: document.getElementById('crosshair'),
+            magnifier: document.getElementById('magnifier'),
+            crosshairToggle: document.getElementById('crosshairToggle'),
+            magnifierToggle: document.getElementById('magnifierToggle'),
+            // Color displays
+            colorPreview: document.getElementById('colorPreview'),
+            hexValue: document.getElementById('hexValue'),
+            rgbValue: document.getElementById('rgbValue'),
+            rgbaValue: document.getElementById('rgbaValue'),
+            hslValue: document.getElementById('hslValue'),
+            hsvValue: document.getElementById('hsvValue'),
+            // Coordinates
+            xCoord: document.getElementById('xCoord'),
+            yCoord: document.getElementById('yCoord'),
+            // Image stats
+            imgWidth: document.getElementById('imgWidth'),
+            imgHeight: document.getElementById('imgHeight'),
+            imgSize: document.getElementById('imgSize'),
+            imgFormat: document.getElementById('imgFormat'),
+            // Toast
+            toast: document.getElementById('toast')
+        };
+
+        // Initialize canvas contexts
+        elements.ctx = elements.canvas.getContext('2d', { willReadFrequently: true });
+        elements.magnifierCtx = elements.magnifierCanvas.getContext('2d', { willReadFrequently: true });
+
+        // ============================================
+        // Color Conversion Utilities
+        // ============================================
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+
+            return {
+                h: Math.round(h * 360),
+                s: Math.round(s * 100),
+                l: Math.round(l * 100)
+            };
+        }
+
+        function rgbToHsv(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const d = max - min;
+            let h;
+            const s = max === 0 ? 0 : d / max;
+            const v = max;
+
+            if (max === min) {
+                h = 0;
+            } else {
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+
+            return {
+                h: Math.round(h * 360),
+                s: Math.round(s * 100),
+                v: Math.round(v * 100)
+            };
+        }
+
+        // ============================================
+        // Image Loading
+        // ============================================
+        function loadImage(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                showToast('Please select a valid image file', false);
+                return;
+            }
+
+            state.imageFile = file;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    state.image = img;
+                    initializeCanvas();
+                    updateImageStats();
+                    elements.emptyState.classList.add('hidden');
+                    elements.canvasWrapper.classList.remove('hidden');
+                    showToast('Image loaded successfully!', true);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ============================================
+        // Canvas Initialization
+        // ============================================
+        function initializeCanvas() {
+            if (!state.image) return;
+
+            // Set canvas size to image size
+            elements.canvas.width = state.image.width;
+            elements.canvas.height = state.image.height;
+
+            // Reset transform
+            state.scale = 1;
+            state.offsetX = 0;
+            state.offsetY = 0;
+
+            // Calculate fit-to-screen scale
+            const container = elements.canvasWrapper.parentElement;
+            const scaleX = (container.clientWidth - 100) / state.image.width;
+            const scaleY = (container.clientHeight - 100) / state.image.height;
+            state.scale = Math.min(scaleX, scaleY, 1);
+
+            drawCanvas();
+            updateZoomDisplay();
+        }
+
+        // ============================================
+        // Canvas Drawing
+        // ============================================
+        function drawCanvas() {
+            if (!state.image) return;
+
+            // Clear canvas
+            elements.ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+
+            // Draw image
+            elements.ctx.drawImage(state.image, 0, 0);
+
+            // Apply transform to wrapper
+            elements.canvasWrapper.style.transform = `scale(${state.scale})`;
+        }
+
+        // ============================================
+        // Zoom Functions
+        // ============================================
+        function zoom(delta) {
+            const oldScale = state.scale;
+            state.scale *= delta > 0 ? 1.2 : 0.8;
+            state.scale = Math.max(state.minScale, Math.min(state.maxScale, state.scale));
+            
+            drawCanvas();
+            updateZoomDisplay();
+        }
+
+        function updateZoomDisplay() {
+            const percent = Math.round(state.scale * 100);
+            elements.zoomDisplay.textContent = `${percent}%`;
+        }
+
+        // ============================================
+        // Pixel Color Picking
+        // ============================================
+        function getPixelColor(x, y) {
+            if (!state.image) return null;
+
+            // Get pixel data from canvas
+            const imageData = elements.ctx.getImageData(x, y, 1, 1);
+            const pixel = imageData.data;
+
+            return {
+                r: pixel[0],
+                g: pixel[1],
+                b: pixel[2],
+                a: pixel[3]
+            };
+        }
+
+        function updateColorDisplays(color) {
+            if (!color) return;
+
+            state.currentColor = color;
+
+            // Update preview
+            elements.colorPreview.style.background = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a / 255})`;
+
+            // Update HEX
+            elements.hexValue.textContent = rgbToHex(color.r, color.g, color.b);
+
+            // Update RGB
+            elements.rgbValue.textContent = `rgb(${color.r}, ${color.g}, ${color.b})`;
+
+            // Update RGBA
+            elements.rgbaValue.textContent = `rgba(${color.r}, ${color.g}, ${color.b}, ${(color.a / 255).toFixed(2)})`;
+
+            // Update HSL
+            const hsl = rgbToHsl(color.r, color.g, color.b);
+            elements.hslValue.textContent = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+
+            // Update HSV
+            const hsv = rgbToHsv(color.r, color.g, color.b);
+            elements.hsvValue.textContent = `hsv(${hsv.h}, ${hsv.s}%, ${hsv.v}%)`;
+        }
+
+        // ============================================
+        // Mouse Event Handlers
+        // ============================================
+        function getCanvasCoordinates(event) {
+            const rect = elements.canvas.getBoundingClientRect();
+            const scaleX = elements.canvas.width / rect.width;
+            const scaleY = elements.canvas.height / rect.height;
+
+            return {
+                x: Math.floor((event.clientX - rect.left) * scaleX),
+                y: Math.floor((event.clientY - rect.top) * scaleY)
+            };
+        }
+
+       elements.canvasWrapper.addEventListener('mousemove', (e) => {
+            if (!state.image) return;
+
+            // Reset keyboard control when mouse moves
+            state.keyboardControlActive = false;
+
+            const coords = getCanvasCoordinates(e);
+
+            // Update state cursor position
+            state.cursorX = coords.x;
+            state.cursorY = coords.y;
+
+            // Update coordinate display
+            elements.xCoord.textContent = coords.x;
+            elements.yCoord.textContent = coords.y;
+
+            // Update crosshair position
+            if (elements.crosshairToggle.checked) {
+                elements.crosshair.classList.add('active');
+                elements.crosshair.style.left = e.offsetX + 'px';
+                elements.crosshair.style.top = e.offsetY + 'px';
+            }
+
+            // Update magnifier
+            if (elements.magnifierToggle.checked) {
+                updateMagnifier(coords.x, coords.y, e.clientX, e.clientY);
+            }
+
+            // Get and update color
+            if (coords.x >= 0 && coords.x < state.image.width && 
+                coords.y >= 0 && coords.y < state.image.height) {
+                const color = getPixelColor(coords.x, coords.y);
+                if (color) {
+                    updateColorDisplays(color);
+                }
+            }
+        });
+
+        elements.canvasWrapper.addEventListener('mouseleave', () => {
+            elements.crosshair.classList.remove('active');
+            elements.magnifier.classList.remove('active');
+        });
+
+        elements.canvasWrapper.addEventListener('click', (e) => {
+            if (!state.image) return;
+
+            const coords = getCanvasCoordinates(e);
+
+            // Check if click is within image bounds
+            if (coords.x >= 0 && coords.x < state.image.width && 
+                coords.y >= 0 && coords.y < state.image.height) {
+                
+                // Update cursor position for keyboard control
+                state.cursorX = coords.x;
+                state.cursorY = coords.y;
+                state.keyboardControlActive = true;
+
+                // Visual feedback
+                showToast(`Position locked at (${coords.x}, ${coords.y})`, true);
+            }
+        });
+
+        // ============================================
+        // Magnifier Function
+        // ============================================
+        function updateMagnifier(imgX, imgY, clientX, clientY) {
+            elements.magnifier.classList.add('active');
+            elements.magnifier.style.left = (clientX + 20) + 'px';
+            elements.magnifier.style.top = (clientY + 20) + 'px';
+
+            // Draw magnified area
+            const magnification = 10;
+            const sourceSize = 20;
+            const destSize = 200;
+
+            elements.magnifierCanvas.width = destSize;
+            elements.magnifierCanvas.height = destSize;
+
+            elements.magnifierCtx.imageSmoothingEnabled = false;
+            elements.magnifierCtx.drawImage(
+                state.image,
+                imgX - sourceSize / 2,
+                imgY - sourceSize / 2,
+                sourceSize,
+                sourceSize,
+                0,
+                0,
+                destSize,
+                destSize
+            );
+        }
+
+        // ============================================
+        // Pan & Zoom with Mouse
+        // ============================================
+        elements.canvasWrapper.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            zoom(e.deltaY);
+        }, { passive: false });
+
+        // ============================================
+        // Image Statistics
+        // ============================================
+        function updateImageStats() {
+            if (!state.image) return;
+
+            elements.imgWidth.textContent = state.image.width + 'px';
+            elements.imgHeight.textContent = state.image.height + 'px';
+
+            if (state.imageFile) {
+                const sizeKB = (state.imageFile.size / 1024).toFixed(2);
+                elements.imgSize.textContent = sizeKB + ' KB';
+                elements.imgFormat.textContent = state.imageFile.type.split('/')[1].toUpperCase();
+            }
+        }
+
+        // ============================================
+        // Copy to Clipboard
+        // ============================================
+        window.copyToClipboard = function(element, format) {
+            const valueElement = element.querySelector('.color-value-text span:first-child');
+            const text = valueElement.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(`${format.toUpperCase()} copied to clipboard!`, true);
+            }).catch(err => {
+                showToast('Failed to copy', false);
+            });
+        };
+
+        // ============================================
+        // Toast Notifications
+        // ============================================
+        function showToast(message, isSuccess = true) {
+            elements.toast.textContent = message;
+            elements.toast.className = 'toast show' + (isSuccess ? ' success' : '');
+            
+            setTimeout(() => {
+                elements.toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================
+        // Event Listeners
+        // ============================================
+        elements.uploadBtn.addEventListener('click', () => {
+            elements.imageInput.click();
+        });
+
+        elements.imageInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files[0]) {
+                loadImage(e.target.files[0]);
+            }
+        });
+
+        elements.resetBtn.addEventListener('click', () => {
+            if (state.image) {
+                initializeCanvas();
+                showToast('View reset', true);
+            }
+        });
+
+        elements.downloadBtn.addEventListener('click', () => {
+            if (!state.image) {
+                showToast('No image to download', false);
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = 'image-inspector-export.png';
+            link.href = elements.canvas.toDataURL();
+            link.click();
+            showToast('Image downloaded!', true);
+        });
+
+        elements.zoomIn.addEventListener('click', () => zoom(1));
+        elements.zoomOut.addEventListener('click', () => zoom(-1));
+        elements.resetZoom.addEventListener('click', () => {
+            if (state.image) {
+                initializeCanvas();
+            }
+        });
+
+        // Drag and Drop
+        const container = document.querySelector('.canvas-container');
+        
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const files = e.dataTransfer.files;
+            if (files && files[0]) {
+                loadImage(files[0]);
+            }
+        });
+
+        // Add this new function before the keyboard event listener (around line 775):
+        // Update the moveCursor function (replace the existing one around line 775):
+        function moveCursor(dx, dy) {
+            if (!state.image) return;
+
+            // Initialize cursor position if not set
+            if (!state.keyboardControlActive) {
+                state.cursorX = Math.floor(state.image.width / 2);
+                state.cursorY = Math.floor(state.image.height / 2);
+            }
+
+            // Update cursor position
+            state.cursorX = Math.max(0, Math.min(state.image.width - 1, state.cursorX + dx));
+            state.cursorY = Math.max(0, Math.min(state.image.height - 1, state.cursorY + dy));
+
+            // Activate keyboard control mode
+            state.keyboardControlActive = true;
+
+            // Calculate position in canvas coordinates
+            const rect = elements.canvas.getBoundingClientRect();
+            const x = (state.cursorX / state.image.width) * rect.width;
+            const y = (state.cursorY / state.image.height) * rect.height;
+
+            // Update coordinate display
+            elements.xCoord.textContent = state.cursorX;
+            elements.yCoord.textContent = state.cursorY;
+
+            // Update crosshair position
+            if (elements.crosshairToggle.checked) {
+                elements.crosshair.classList.add('active');
+                elements.crosshair.style.left = state.cursorX + 'px';
+                elements.crosshair.style.top = state.cursorY + 'px';
+            }
+
+            // Update magnifier - calculate screen position
+            if (elements.magnifierToggle.checked) {
+                const canvasRect = elements.canvasWrapper.getBoundingClientRect();
+                const screenX = canvasRect.left + x;
+                const screenY = canvasRect.top + y;
+                updateMagnifier(state.cursorX, state.cursorY, screenX, screenY);
+            }
+
+            // Get and update color
+            const color = getPixelColor(state.cursorX, state.cursorY);
+            if (color) {
+                updateColorDisplays(color);
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (!state.image) return;
+
+            // Zoom shortcuts
+            switch(e.key) {
+                case '+':
+                case '=':
+                    zoom(1);
+                    break;
+                case '-':
+                case '_':
+                    zoom(-1);
+                    break;
+                case '0':
+                    initializeCanvas();
+                    break;
+                case 'r':
+                case 'R':
+                    initializeCanvas();
+                    break;
+                // NEW ARROW KEY NAVIGATION:
+                case 'ArrowUp':
+                    e.preventDefault();
+                    moveCursor(0, -1);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    moveCursor(0, 1);
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    moveCursor(-1, 0);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    moveCursor(1, 0);
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

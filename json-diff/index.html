@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>JSON Diff Studio - Semantic JSON Comparison</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="SidPro"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta name="description" content="Compare and analyze JSON files instantly with our free online JSON diff tool. Features side-by-side comparison, syntax highlighting, type checking, and visual difference detection. Perfect for developers, QA engineers, and API testing.">
+    <meta name="keywords" content="JSON diff, JSON compare, JSON comparison tool, compare JSON online, JSON difference checker, JSON validator, JSON formatter, side by side JSON comparison, JSON syntax highlighter, JSON array comparison, JSON type checker, free JSON tool, online JSON editor, JSON debugging tool, API testing tool, JSON merge tool, semantic JSON diff, JSON object comparison, nested JSON comparison, JSON difference viewer">
+    <!-- icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+    <link rel="manifest" href="../icons/manifest.json" />
+    <!-- icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link href="style.css" rel="stylesheet" type="text/css" charset="utf-8" /> 
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JSON Diff Studio</h1>
+            <p class="subtitle">Semantic JSON Comparison Tool</p>
+        </header>
+        
+        <div class="control-panel">
+            <div class="input-section">
+                <div class="input-group">
+                    <div class="input-header">
+                        <span class="input-label left">Left JSON</span>
+                        <div class="input-actions">
+                            <button class="btn-small" onclick="formatJSON('left')">Format</button>
+                            <button class="btn-small" onclick="clearInput('left')">Clear</button>
+                            <label class="btn-small" style="margin: 0;">
+                                Load File
+                                <input type="file" id="leftFile" accept=".json" style="display: none;" onchange="loadFile('left')">
+                            </label>
+                        </div>
+                    </div>
+                    <textarea id="leftJSON" placeholder='Paste your JSON here or load from file...'></textarea>
+                    <div class="error-message" id="leftError"></div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-header">
+                        <span class="input-label right">Right JSON</span>
+                        <div class="input-actions">
+                            <button class="btn-small" onclick="formatJSON('right')">Format</button>
+                            <button class="btn-small" onclick="clearInput('right')">Clear</button>
+                            <label class="btn-small" style="margin: 0;">
+                                Load File
+                                <input type="file" id="rightFile" accept=".json" style="display: none;" onchange="loadFile('right')">
+                            </label>
+                        </div>
+                    </div>
+                    <textarea id="rightJSON" placeholder='Paste your JSON here or load from file...'></textarea>
+                    <div class="error-message" id="rightError"></div>
+                </div>
+            </div>
+            
+            <!-- <div class="options-section">
+                <div class="options-title">Comparison Options</div>
+                <div class="options-grid">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="ignoreArrayOrder" checked>
+                        <label for="ignoreArrayOrder">Ignore Array Order</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="ignoreCase">
+                        <label for="ignoreCase">Ignore Case (Strings)</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="strictTypes" checked>
+                        <label for="strictTypes">Strict Type Checking</label>
+                    </div>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="showIdentical">
+                        <label for="showIdentical">Show Identical Values</label>
+                    </div>
+                </div>
+            </div> -->
+            
+            <div class="action-buttons">
+                <button class="btn-primary" onclick="compareJSON()">
+                    Compare JSON
+                </button>
+                <button class="btn-secondary" onclick="loadSampleData()">
+                    Load Sample Data
+                </button>
+                <button class="btn-secondary" onclick="swapInputs()">
+                    Swap Inputs ⇄
+                </button>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: var(--text-secondary); font-family: 'Space Mono', monospace;">Analyzing differences...</p>
+        </div>
+        
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <div>
+                    <div class="results-title">Found <span id="totalDifferences">0</span> differences</div>
+                </div>
+                <div style="display: flex; gap: 2rem; align-items: center;">
+                    <div class="diff-navigation">
+                        <button class="nav-button" onclick="navigateDiff('prev')" id="btnPrev">←</button>
+                        <span class="nav-info"><span id="currentDiffIndex">1</span> of <span id="totalDiffCount">0</span></span>
+                        <button class="nav-button" onclick="navigateDiff('next')" id="btnNext">→</button>
+                    </div>
+                    <div class="view-toggle">
+                        <button class="view-btn" onclick="switchView('unified')" id="btnUnified">Unified</button>
+                        <button class="view-btn active" onclick="switchView('sidebyside')" id="btnSideBySide">Side by Side</button>
+                    </div>
+                </div>
+            </div>
+            <div class="highlight-filters">
+                <span class="filter-label">Show:</span>
+                <div class="filter-group">
+                    <div class="filter-checkbox missing-prop">
+                        <input type="checkbox" id="showMissing" checked onchange="updateHighlights()">
+                        <label for="showMissing">
+                            <span id="missingCount">0</span> missing properties
+                        </label>
+                    </div>
+                    <div class="filter-checkbox incorrect-type">
+                        <input type="checkbox" id="showIncorrectType" checked onchange="updateHighlights()">
+                        <label for="showIncorrectType">
+                            <span id="incorrectTypeCount">0</span> incorrect types
+                        </label>
+                    </div>
+                    <div class="filter-checkbox unequal-value">
+                        <input type="checkbox" id="showUnequal" checked onchange="updateHighlights()">
+                        <label for="showUnequal">
+                            <span id="unequalCount">0</span> unequal values
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="results-body" id="resultsBody"></div>
+        </div>
+        <div style=" display: flex;
+            align-items: center;
+            justify-content: center;">
+                <p style="margin-top: 50px;margin-bottom: 20px;text-align: center; ">
+                    © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+                </p>    
+        </div>
+    </div>
+    
+    <script>
+        // Global state
+        let currentView = 'sidebyside';
+        let comparisonResults = null;
+        let leftData = null;
+        let rightData = null;
+        let leftLines = [];
+        let rightLines = [];
+        let diffMap = {
+            missing: [],
+            incorrectType: [],
+            unequal: []
+        };
+        let currentDiffIndex = 0;
+        let allDiffs = [];
+        
+        // Load file
+        function loadFile(side) {
+            const fileInput = document.getElementById(side + 'File');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById(side + 'JSON').value = e.target.result;
+                validateJSON(side);
+            };
+            reader.readAsText(file);
+        }
+        
+        // Format JSON
+        function formatJSON(side) {
+            const textarea = document.getElementById(side + 'JSON');
+            const errorDiv = document.getElementById(side + 'Error');
+            
+            try {
+                const parsed = JSON.parse(textarea.value);
+                textarea.value = JSON.stringify(parsed, null, 2);
+                errorDiv.classList.remove('show');
+                textarea.classList.remove('error');
+            } catch (e) {
+                errorDiv.textContent = 'Invalid JSON: ' + e.message;
+                errorDiv.classList.add('show');
+                textarea.classList.add('error');
+            }
+        }
+        
+        // Clear input
+        function clearInput(side) {
+            document.getElementById(side + 'JSON').value = '';
+            document.getElementById(side + 'Error').classList.remove('show');
+            document.getElementById(side + 'JSON').classList.remove('error');
+        }
+        
+        // Validate JSON
+        function validateJSON(side) {
+            const textarea = document.getElementById(side + 'JSON');
+            const errorDiv = document.getElementById(side + 'Error');
+            
+            try {
+                JSON.parse(textarea.value);
+                errorDiv.classList.remove('show');
+                textarea.classList.remove('error');
+                return true;
+            } catch (e) {
+                errorDiv.textContent = 'Invalid JSON: ' + e.message;
+                errorDiv.classList.add('show');
+                textarea.classList.add('error');
+                return false;
+            }
+        }
+        
+        // Swap inputs
+        function swapInputs() {
+            const leftJSON = document.getElementById('leftJSON').value;
+            const rightJSON = document.getElementById('rightJSON').value;
+            
+            document.getElementById('leftJSON').value = rightJSON;
+            document.getElementById('rightJSON').value = leftJSON;
+        }
+        
+        // Load sample data
+        function loadSampleData() {
+            const sampleLeft = {
+                "Aidan Gillen": {
+                    "aboolean": true,
+                    "array": [
+                        "Game of Thron\"es",
+                        "The Wire"
+                    ],
+                    "boolean": true,
+                    "int": 2,
+                    "object": {
+                        "foo": "bar",
+                        "object1": {
+                            "new prop1": "new prop value"
+                        },
+                        "object2": {
+                            "new prop1": "new prop value"
+                        },
+                        "object3": {
+                            "new prop1": "new prop value"
+                        },
+                        "object4": {
+                            "new prop1": "new prop value"
+                        }
+                    },
+                    "string": "some string"
+                },
+                "Alexander Skarsgard": [
+                    "Generation Kill",
+                    "True Blood"
+                ],
+                "Amy Ryan": {
+                    "one": "In Treatment",
+                    "two": "The Wire"
+                },
+                "Annie Fitzgerald": [
+                    "Big Love",
+                    "True Blood"
+                ],
+                "Anwan Glover": [
+                    "Treme",
+                    "The Wire"
+                ]
+            };
+            
+            const sampleRight = {
+                "Aidan Gillen": {
+                    "aboolean": "true",
+                    "array": [
+                        "Game of Thrones",
+                        "The Wire"
+                    ],
+                    "boolean": false,
+                    "int": "2",
+                    "object": {
+                        "foo": "bar"
+                    },
+                    "otherint": 4,
+                    "string": "some string"
+                },
+                "Alexander Skarsg?rd": [
+                    "Generation Kill",
+                    "True Blood"
+                ],
+                "Alice Farmer": [
+                    "The Corner",
+                    "Oz",
+                    "The Wire"
+                ],
+                "Amy Ryan": [
+                    "In Treatment",
+                    "The Wire"
+                ],
+                "Annie Fitzgerald": [
+                    "True Blood",
+                    "Big Love",
+                    "The Sopranos",
+                    "Oz"
+                ],
+                "Anwan Glover": [
+                    "Treme",
+                    "The Wire"
+                ]
+            };
+            
+            document.getElementById('leftJSON').value = JSON.stringify(sampleLeft, null, 2);
+            document.getElementById('rightJSON').value = JSON.stringify(sampleRight, null, 2);
+        }
+        
+        // Compare JSON
+        function compareJSON() {
+            // Validate both inputs
+            const leftValid = validateJSON('left');
+            const rightValid = validateJSON('right');
+            
+            if (!leftValid || !rightValid) {
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultsSection').classList.remove('show');
+            
+            // Simulate processing time for UX
+            setTimeout(() => {
+                try {
+                    leftData = JSON.parse(document.getElementById('leftJSON').value);
+                    rightData = JSON.parse(document.getElementById('rightJSON').value);
+                    
+                    // Format JSON for line-by-line comparison
+                    const leftFormatted = JSON.stringify(leftData, null, 2);
+                    const rightFormatted = JSON.stringify(rightData, null, 2);
+                    
+                    leftLines = leftFormatted.split('\n');
+                    rightLines = rightFormatted.split('\n');
+                    
+                    // Perform detailed comparison
+                    performDetailedComparison(leftData, rightData);
+                    
+                    // Display results
+                    displayResults();
+                    
+                    // Hide loading, show results
+                    document.getElementById('loading').classList.remove('show');
+                    document.getElementById('resultsSection').classList.add('show');
+                    
+                    // Scroll to results
+                    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+                    
+                } catch (e) {
+                    document.getElementById('loading').classList.remove('show');
+                    alert('Error during comparison: ' + e.message);
+                }
+            }, 500);
+        }
+        
+        // Perform detailed comparison
+        // Perform detailed comparison with improved array handling
+        function performDetailedComparison(left, right) {
+            diffMap = {
+                missing: [],
+                incorrectType: [],
+                unequal: []
+            };
+            
+            allDiffs = [];
+            
+            function comparePaths(leftObj, rightObj, path = '') {
+                const leftKeys = leftObj && typeof leftObj === 'object' && !Array.isArray(leftObj) ? Object.keys(leftObj) : [];
+                const rightKeys = rightObj && typeof rightObj === 'object' && !Array.isArray(rightObj) ? Object.keys(rightObj) : [];
+                const allKeys = new Set([...leftKeys, ...rightKeys]);
+                
+                for (let key of allKeys) {
+                    const currentPath = path ? `${path}.${key}` : key;
+                    const leftValue = leftObj ? leftObj[key] : undefined;
+                    const rightValue = rightObj ? rightObj[key] : undefined;
+                    
+                    if (leftValue === undefined && rightValue !== undefined) {
+                        // Missing in left (exists in right)
+                        const diff = {
+                            type: 'missing',
+                            path: currentPath,
+                            side: 'left',
+                            value: rightValue
+                        };
+                        diffMap.missing.push(diff);
+                        allDiffs.push(diff);
+                    } else if (rightValue === undefined && leftValue !== undefined) {
+                        // Missing in right (exists in left)
+                        const diff = {
+                            type: 'missing',
+                            path: currentPath,
+                            side: 'right',
+                            value: leftValue
+                        };
+                        diffMap.missing.push(diff);
+                        allDiffs.push(diff);
+                    } else if (Array.isArray(leftValue) && Array.isArray(rightValue)) {
+                        // Compare arrays
+                        compareArrays(leftValue, rightValue, currentPath);
+                    } else if (typeof leftValue !== typeof rightValue) {
+                        // Type mismatch
+                        const diff = {
+                            type: 'incorrectType',
+                            path: currentPath,
+                            leftValue: leftValue,
+                            rightValue: rightValue,
+                            leftType: typeof leftValue,
+                            rightType: typeof rightValue
+                        };
+                        diffMap.incorrectType.push(diff);
+                        allDiffs.push(diff);
+                    } else if (typeof leftValue === 'object' && leftValue !== null && rightValue !== null) {
+                        // Recurse into objects
+                        comparePaths(leftValue, rightValue, currentPath);
+                    } else if (leftValue !== rightValue) {
+                        // Values are unequal
+                        const diff = {
+                            type: 'unequal',
+                            path: currentPath,
+                            leftValue: leftValue,
+                            rightValue: rightValue
+                        };
+                        diffMap.unequal.push(diff);
+                        allDiffs.push(diff);
+                    }
+                }
+            }
+            
+            function compareArrays(leftArr, rightArr, path) {
+                // Find elements missing in left array
+                rightArr.forEach((rightElement, rightIndex) => {
+                    const foundInLeft = leftArr.some(leftElement => 
+                        JSON.stringify(leftElement) === JSON.stringify(rightElement)
+                    );
+                    
+                    if (!foundInLeft) {
+                        const diff = {
+                            type: 'missing',
+                            path: `${path}[${rightIndex}]`,
+                            side: 'left',
+                            value: rightElement,
+                            arrayElement: true,
+                            arrayPath: path
+                        };
+                        diffMap.missing.push(diff);
+                        allDiffs.push(diff);
+                    }
+                });
+                
+                // Find elements missing in right array
+                leftArr.forEach((leftElement, leftIndex) => {
+                    const foundInRight = rightArr.some(rightElement => 
+                        JSON.stringify(rightElement) === JSON.stringify(leftElement)
+                    );
+                    
+                    if (!foundInRight) {
+                        const diff = {
+                            type: 'missing',
+                            path: `${path}[${leftIndex}]`,
+                            side: 'right',
+                            value: leftElement,
+                            arrayElement: true,
+                            arrayPath: path
+                        };
+                        diffMap.missing.push(diff);
+                        allDiffs.push(diff);
+                    }
+                });
+                
+                // Compare elements at same index for type/value differences
+                const minLength = Math.min(leftArr.length, rightArr.length);
+                for (let i = 0; i < minLength; i++) {
+                    const leftElement = leftArr[i];
+                    const rightElement = rightArr[i];
+                    
+                    if (typeof leftElement !== typeof rightElement) {
+                        const diff = {
+                            type: 'incorrectType',
+                            path: `${path}[${i}]`,
+                            leftValue: leftElement,
+                            rightValue: rightElement,
+                            leftType: typeof leftElement,
+                            rightType: typeof rightElement
+                        };
+                        diffMap.incorrectType.push(diff);
+                        allDiffs.push(diff);
+                    } else if (typeof leftElement === 'object' && leftElement !== null && rightElement !== null) {
+                        if (Array.isArray(leftElement) && Array.isArray(rightElement)) {
+                            compareArrays(leftElement, rightElement, `${path}[${i}]`);
+                        } else {
+                            comparePaths(leftElement, rightElement, `${path}[${i}]`);
+                        }
+                    } else if (JSON.stringify(leftElement) !== JSON.stringify(rightElement)) {
+                        const diff = {
+                            type: 'unequal',
+                            path: `${path}[${i}]`,
+                            leftValue: leftElement,
+                            rightValue: rightElement
+                        };
+                        diffMap.unequal.push(diff);
+                        allDiffs.push(diff);
+                    }
+                }
+            }
+            
+            comparePaths(left, right);
+            
+            // Update counts
+            document.getElementById('missingCount').textContent = diffMap.missing.length;
+            document.getElementById('incorrectTypeCount').textContent = diffMap.incorrectType.length;
+            document.getElementById('unequalCount').textContent = diffMap.unequal.length;
+            document.getElementById('totalDifferences').textContent = allDiffs.length;
+            document.getElementById('totalDiffCount').textContent = allDiffs.length;
+            
+            if (allDiffs.length > 0) {
+                currentDiffIndex = 0;
+                document.getElementById('currentDiffIndex').textContent = '1';
+            }
+        }
+
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+        
+        // Improved function to find line numbers for array elements
+        function findLineNumbersForPath(lines, path, jsonData) {
+            // Check if this is an array element path
+            const arrayMatch = path.match(/^(.+)\[(\d+)\]$/);
+            
+            if (arrayMatch) {
+                const arrayPath = arrayMatch[1];
+                const arrayIndex = parseInt(arrayMatch[2]);
+                
+                // Find the array property first
+                const arrayPathParts = arrayPath.split('.');
+                let currentLineStart = 0;
+                let currentObj = jsonData;
+                
+                // Navigate to the array
+                for (let i = 0; i < arrayPathParts.length; i++) {
+                    const key = arrayPathParts[i];
+                    const searchPattern = new RegExp(`^\\s*"${escapeRegex(key)}"\\s*:`);
+                    
+                    for (let lineNum = currentLineStart; lineNum < lines.length; lineNum++) {
+                        const line = lines[lineNum];
+                        
+                        if (searchPattern.test(line)) {
+                            // Check if array starts on same line or next line
+                            if (line.includes('[')) {
+                                currentLineStart = lineNum + 1;
+                            } else {
+                                currentLineStart = lineNum + 1;
+                                // Find the opening bracket
+                                for (let j = currentLineStart; j < lines.length; j++) {
+                                    if (lines[j].trim().startsWith('[')) {
+                                        currentLineStart = j + 1;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            if (currentObj && typeof currentObj === 'object') {
+                                currentObj = currentObj[key];
+                            }
+                            break;
+                        }
+                    }
+                }
+                
+                // Now find the specific array element by counting non-structural lines
+                if (Array.isArray(currentObj)) {
+                    let arrayElementCount = 0;
+                    let foundLine = null;
+                    
+                    for (let lineNum = currentLineStart; lineNum < lines.length; lineNum++) {
+                        const line = lines[lineNum].trim();
+                        
+                        // Stop if we've closed the array
+                        if (line.startsWith(']')) {
+                            break;
+                        }
+                        
+                        // Skip empty lines and structural lines
+                        if (!line || line === '{' || line === '[') {
+                            continue;
+                        }
+                        
+                        // Check if this is an array element (not a property with colon)
+                        // Array elements are lines that don't contain ':' (except inside strings)
+                        const isProperty = line.match(/^\s*"[^"]+"\s*:/);
+                        
+                        if (!isProperty) {
+                            // This is an array element
+                            if (arrayElementCount === arrayIndex) {
+                                foundLine = lineNum;
+                                break;
+                            }
+                            arrayElementCount++;
+                        }
+                    }
+                    
+                    if (foundLine !== null) {
+                        return [foundLine];
+                    }
+                }
+                
+                return [];
+            }
+            
+            // Regular property path (non-array)
+            const pathParts = path.split('.');
+            let currentLineStart = 0;
+            let currentObj = jsonData;
+            
+            for (let i = 0; i < pathParts.length; i++) {
+                const key = pathParts[i];
+                const isLastPart = i === pathParts.length - 1;
+                
+                const searchPattern = new RegExp(`^\\s*"${escapeRegex(key)}"\\s*:`);
+                
+                for (let lineNum = currentLineStart; lineNum < lines.length; lineNum++) {
+                    const line = lines[lineNum];
+                    
+                    if (searchPattern.test(line)) {
+                        if (isLastPart) {
+                            return [lineNum];
+                        } else {
+                            currentLineStart = lineNum + 1;
+                            
+                            if (currentObj && typeof currentObj === 'object') {
+                                currentObj = currentObj[key];
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            return [];
+        }
+        
+        
+        // Display results
+        function displayResults() {
+            if (currentView === 'sidebyside') {
+                displaySideBySideView();
+            } else {
+                displayUnifiedView();
+            }
+        }
+        
+        // Display side by side view with inline highlighting
+        function displaySideBySideView() {
+            const resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = '';
+            
+            if (allDiffs.length === 0) {
+                resultsBody.innerHTML = `
+                    <div class="no-diff">
+                        <div class="no-diff-icon">✓</div>
+                        <div class="no-diff-title">No Differences Found</div>
+                        <div class="no-diff-text">The JSON objects are identical</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const container = document.createElement('div');
+            container.className = 'side-by-side';
+            
+            // Build left panel
+            const leftPanel = document.createElement('div');
+            leftPanel.className = 'side-panel';
+            leftPanel.id = 'leftPanel';
+            
+            leftLines.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'json-line';
+                lineDiv.dataset.lineNumber = index;
+                
+                const lineNumber = document.createElement('span');
+                lineNumber.className = 'line-number';
+                lineNumber.textContent = index + 1;
+                
+                const lineContent = document.createElement('span');
+                lineContent.className = 'line-content';
+                lineContent.textContent = line;
+                
+                lineDiv.appendChild(lineNumber);
+                lineDiv.appendChild(lineContent);
+                leftPanel.appendChild(lineDiv);
+            });
+            
+            // Build right panel
+            const rightPanel = document.createElement('div');
+            rightPanel.className = 'side-panel';
+            rightPanel.id = 'rightPanel';
+            
+            rightLines.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'json-line';
+                lineDiv.dataset.lineNumber = index;
+                
+                const lineNumber = document.createElement('span');
+                lineNumber.className = 'line-number';
+                lineNumber.textContent = index + 1;
+                
+                const lineContent = document.createElement('span');
+                lineContent.className = 'line-content';
+                lineContent.textContent = line;
+                
+                lineDiv.appendChild(lineNumber);
+                lineDiv.appendChild(lineContent);
+                rightPanel.appendChild(lineDiv);
+            });
+            
+            container.appendChild(leftPanel);
+            container.appendChild(rightPanel);
+            resultsBody.appendChild(container);
+            
+            // Apply highlights
+            updateHighlights();
+        }
+        
+        // Update highlights based on filter checkboxes
+        // Updated updateHighlights to handle array elements
+        function updateHighlights() {
+            const showMissing = document.getElementById('showMissing').checked;
+            const showIncorrectType = document.getElementById('showIncorrectType').checked;
+            const showUnequal = document.getElementById('showUnequal').checked;
+            
+            // Clear all highlights
+            document.querySelectorAll('.json-line').forEach(line => {
+                line.classList.remove('highlight-missing', 'highlight-incorrect-type', 'highlight-unequal');
+            });
+            
+            // Apply highlights based on diffs and filters
+            allDiffs.forEach(diff => {
+                let highlightClass = '';
+                let shouldHighlight = false;
+                
+                if (diff.type === 'missing' && showMissing) {
+                    highlightClass = 'highlight-missing';
+                    shouldHighlight = true;
+                } else if (diff.type === 'incorrectType' && showIncorrectType) {
+                    highlightClass = 'highlight-incorrect-type';
+                    shouldHighlight = true;
+                } else if (diff.type === 'unequal' && showUnequal) {
+                    highlightClass = 'highlight-unequal';
+                    shouldHighlight = true;
+                }
+                
+                if (shouldHighlight) {
+                    if (diff.type === 'missing') {
+                        // For missing properties/array elements, highlight where the value EXISTS
+                        if (diff.side === 'left') {
+                            // Missing in left, exists in right
+                            const lineNumbers = findLineNumbersForPath(rightLines, diff.path, rightData);
+                            lineNumbers.forEach(lineNum => {
+                                const rightLine = document.querySelector(`#rightPanel .json-line[data-line-number="${lineNum}"]`);
+                                if (rightLine) rightLine.classList.add(highlightClass);
+                            });
+                        } else if (diff.side === 'right') {
+                            // Missing in right, exists in left
+                            const lineNumbers = findLineNumbersForPath(leftLines, diff.path, leftData);
+                            lineNumbers.forEach(lineNum => {
+                                const leftLine = document.querySelector(`#leftPanel .json-line[data-line-number="${lineNum}"]`);
+                                if (leftLine) leftLine.classList.add(highlightClass);
+                            });
+                        }
+                    } else {
+                        // For type mismatches and unequal values, highlight in both panels
+                        const leftLineNumbers = findLineNumbersForPath(leftLines, diff.path, leftData);
+                        const rightLineNumbers = findLineNumbersForPath(rightLines, diff.path, rightData);
+                        
+                        leftLineNumbers.forEach(lineNum => {
+                            const leftLine = document.querySelector(`#leftPanel .json-line[data-line-number="${lineNum}"]`);
+                            if (leftLine) leftLine.classList.add(highlightClass);
+                        });
+                        
+                        rightLineNumbers.forEach(lineNum => {
+                            const rightLine = document.querySelector(`#rightPanel .json-line[data-line-number="${lineNum}"]`);
+                            if (rightLine) rightLine.classList.add(highlightClass);
+                        });
+                    }
+                }
+            });
+        }
+        
+        // Navigate through differences
+        function navigateDiff(direction) {
+            if (allDiffs.length === 0) return;
+            
+            if (direction === 'next') {
+                currentDiffIndex = (currentDiffIndex + 1) % allDiffs.length;
+            } else {
+                currentDiffIndex = (currentDiffIndex - 1 + allDiffs.length) % allDiffs.length;
+            }
+            
+            document.getElementById('currentDiffIndex').textContent = currentDiffIndex + 1;
+            
+            // Scroll to the difference
+            const diff = allDiffs[currentDiffIndex];
+            const lineNumbers = findLineNumbersForPath(leftLines, diff.path);
+            
+            if (lineNumbers.length > 0) {
+                const lineNum = lineNumbers[0];
+                const leftLine = document.querySelector(`#leftPanel .json-line[data-line-number="${lineNum}"]`);
+                
+                if (leftLine) {
+                    leftLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+        
+        // Display unified view (original implementation)
+        function displayUnifiedView() {
+            const resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = '';
+            
+            if (allDiffs.length === 0) {
+                resultsBody.innerHTML = `
+                    <div class="no-diff">
+                        <div class="no-diff-icon">✓</div>
+                        <div class="no-diff-title">No Differences Found</div>
+                        <div class="no-diff-text">The JSON objects are identical</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            allDiffs.forEach((diff, index) => {
+                const diffItem = document.createElement('div');
+                diffItem.className = 'diff-item';
+                diffItem.innerHTML = `
+                    <div class="diff-header" onclick="toggleDiffContent(${index})">
+                        <span class="diff-path">${escapeHtml(diff.path)}</span>
+                        <span class="diff-type ${diff.type}">${diff.type}</span>
+                    </div>
+                    <div class="diff-content" id="diffContent${index}">
+                        ${generateDiffContent(diff)}
+                    </div>
+                `;
+                resultsBody.appendChild(diffItem);
+            });
+        }
+        
+        // Generate diff content HTML
+        function generateDiffContent(diff) {
+            let html = '';
+            
+            if (diff.type === 'missing') {
+                html = `
+                    <div class="value-container">
+                        <div class="value-label">Missing in ${diff.side} JSON</div>
+                        <div class="value-content added">${formatValue(diff.value)}</div>
+                    </div>
+                `;
+            } else if (diff.type === 'incorrectType') {
+                html = `
+                    <div class="value-container">
+                        <div class="value-label">Left Value (${diff.leftType})</div>
+                        <div class="value-content removed">${formatValue(diff.leftValue)}</div>
+                    </div>
+                    <div class="value-container">
+                        <div class="value-label">Right Value (${diff.rightType})</div>
+                        <div class="value-content added">${formatValue(diff.rightValue)}</div>
+                    </div>
+                `;
+            } else if (diff.type === 'unequal') {
+                html = `
+                    <div class="value-container">
+                        <div class="value-label">Left Value</div>
+                        <div class="value-content removed">${formatValue(diff.leftValue)}</div>
+                    </div>
+                    <div class="value-container">
+                        <div class="value-label">Right Value</div>
+                        <div class="value-content added">${formatValue(diff.rightValue)}</div>
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+        
+        // Toggle diff content
+        function toggleDiffContent(index) {
+            const content = document.getElementById('diffContent' + index);
+            content.classList.toggle('expanded');
+        }
+        
+        // Switch view
+        function switchView(view) {
+            currentView = view;
+            
+            document.getElementById('btnUnified').classList.remove('active');
+            document.getElementById('btnSideBySide').classList.remove('active');
+            
+            if (view === 'unified') {
+                document.getElementById('btnUnified').classList.add('active');
+            } else {
+                document.getElementById('btnSideBySide').classList.add('active');
+            }
+            
+            if (comparisonResults || allDiffs.length > 0) {
+                displayResults();
+            }
+        }
+        
+        // Format value for display
+        function formatValue(value) {
+            if (value === null) return '<span style="color: var(--text-tertiary);">null</span>';
+            if (value === undefined) return '<span style="color: var(--text-tertiary);">undefined</span>';
+            if (typeof value === 'object') {
+                return escapeHtml(JSON.stringify(value, null, 2));
+            }
+            if (typeof value === 'string') {
+                return `"${escapeHtml(value)}"`;
+            }
+            return escapeHtml(String(value));
+        }
+        
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Add real-time validation
+        document.getElementById('leftJSON').addEventListener('input', function() {
+            if (this.value.trim()) {
+                validateJSON('left');
+            }
+        });
+        
+        document.getElementById('rightJSON').addEventListener('input', function() {
+            if (this.value.trim()) {
+                validateJSON('right');
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                compareJSON();
+            }
+        });
+    </script>
+</body>
+</html>
