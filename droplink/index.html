@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DropLink — P2P File Sharing</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="SidPro"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta name="description" content="Send files directly between devices with no cloud, no server, and no file size limit. DropLink uses WebRTC for peer-to-peer, end-to-end encrypted file sharing — no sign-ups, no tracking, completely free."/>
+    <meta name="keywords" content="droplink, file sharing, peer to peer, p2p file transfer, webrtc, send files, direct file transfer, encrypted file sharing, no upload, no server, browser file sharing, secure file transfer"/>
+    <!-- icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="icons/favicon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="icons/favicon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="icons/favicon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="icons/favicon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="icons/favicon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="icons/favicon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/favicon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/favicon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/favicon-192x192.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="icons/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="icons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="icons/browserconfig.xml" />
+    <link rel="manifest" href="icons/manifest.json" />
+    <!-- icons -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"> -->
+    <link href="style.css" rel="stylesheet" type="text/css" charset="utf-8" /> 
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="logo">Drop<span>Link</span></div>
+    <div class="subtitle">Peer-to-peer file sharing · No server · No limits</div>
+  </div>
+
+  <noscript>
+    <i style="color:orange;font-size:24px;">Your browser does not support JavaScript!</i><br/>
+     <img src="../image/noscript.png" style="width:auto;height:auto;" />
+  </noscript>
+  <!-- How It Works Card -->
+  <div class="card">
+    <button class="info-toggle" id="infoToggle" onclick="toggleInfo()">
+      <span>ℹ︎ &nbsp;How does this work? Is it safe?</span>
+      <span class="chevron">▼</span>
+    </button>
+    <div class="info-body" id="infoBody">
+
+      <!-- What is this -->
+      <div class="info-section">
+        <div class="info-heading"><span class="info-icon">💡</span> What is DropLink?</div>
+        <p class="info-text">
+          DropLink lets you send files directly from one device to another — with <strong>no cloud, no server, and no file size limit</strong>. 
+          Your files never leave the direct connection between you and the other person. Think of it like handing a USB drive to someone, but over the internet.
+        </p>
+      </div>
+
+      <!-- How connection works -->
+      <div class="info-section">
+        <div class="info-heading"><span class="info-icon">🔗</span> How does the connection work?</div>
+        <p class="info-text">
+          DropLink uses a technology called <strong>WebRTC</strong>, which is built into every modern browser. 
+          Instead of uploading your file to a server and having the other person download it, 
+          WebRTC creates a <strong>direct tunnel</strong> between the two browsers. Here's the simple version:
+        </p>
+        <div class="info-steps-visual">
+          <div class="info-step-item">
+            <div class="step-emoji">📡</div>
+            <div class="step-text">Sender creates<br/>an invite code</div>
+          </div>
+          <div class="info-arrow">→</div>
+          <div class="info-step-item">
+            <div class="step-emoji">📋</div>
+            <div class="step-text">Code is shared<br/>via chat / email</div>
+          </div>
+          <div class="info-arrow">→</div>
+          <div class="info-step-item">
+            <div class="step-emoji">📥</div>
+            <div class="step-text">Receiver pastes it<br/>& sends back reply</div>
+          </div>
+          <div class="info-arrow">→</div>
+          <div class="info-step-item">
+            <div class="step-emoji">⚡</div>
+            <div class="step-text">Direct tunnel<br/>established!</div>
+          </div>
+        </div>
+        <p class="info-text" style="margin-top: 14px;">
+          The invite codes are just a way for both browsers to find each other on the internet.
+          Once connected, <strong>the codes are no longer needed</strong> and all data flows directly between the two devices.
+        </p>
+      </div>
+
+      <!-- Is it safe -->
+      <div class="info-section">
+        <div class="info-heading"><span class="info-icon">🔒</span> Is my data safe?</div>
+        <p class="info-text">
+          Yes — here's why:
+        </p>
+        <div class="info-grid">
+          <div class="info-badge">
+            <span class="badge-icon">🔐</span>
+            <div>
+              <div class="badge-label">End-to-End Encrypted</div>
+              <div class="badge-desc">All data is encrypted using DTLS &amp; SRTP — the same security used by video calls in Google Meet and Zoom. No one in between can read your files.</div>
+            </div>
+          </div>
+          <div class="info-badge">
+            <span class="badge-icon">🚫</span>
+            <div>
+              <div class="badge-label">No Server Storage</div>
+              <div class="badge-desc">Your files are never uploaded anywhere. They travel directly from one browser to the other. Once the transfer is done, nothing is stored.</div>
+            </div>
+          </div>
+          <div class="info-badge">
+            <span class="badge-icon">👤</span>
+            <div>
+              <div class="badge-label">No Accounts Needed</div>
+              <div class="badge-desc">No sign-ups, no tracking, no cookies. DropLink doesn't know who you are and doesn't keep any records of your transfers.</div>
+            </div>
+          </div>
+          <div class="info-badge">
+            <span class="badge-icon">🌐</span>
+            <div>
+              <div class="badge-label">Works Offline-ish</div>
+              <div class="badge-desc">The only external service used is a free STUN server (by Google) which helps the two devices discover each other. It never sees your files.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Can someone hijack -->
+      <div class="info-section">
+        <div class="info-heading"><span class="info-icon">🛡️</span> Can someone intercept or hijack my files?</div>
+        <p class="info-text">
+          It's extremely unlikely. Here's the breakdown:
+        </p>
+        <div class="info-highlight">
+          <strong>The connection is encrypted.</strong> Even if someone were to capture the network traffic between you and your peer, 
+          they would only see scrambled, unreadable data. The encryption keys are negotiated directly between the two browsers 
+          and are never shared with any server.<br/><br/>
+          <strong>The invite code itself is not secret data</strong> — it only contains network information (like IP addresses) to help the two devices find each other. 
+          However, you should still share it through a <strong>trusted channel</strong> (like a private chat) so that a stranger 
+          doesn't use it to connect to you instead of your intended peer.<br/><br/>
+          <strong>Bottom line:</strong> As long as you share the invite code with the right person, your file transfer is private, encrypted, and direct. 
+          No third party — not even DropLink — can see what you're sending.
+        </div>
+      </div>
+
+      <!-- Limitations -->
+      <div class="info-section">
+        <div class="info-heading"><span class="info-icon">⚠️</span> Good to know</div>
+        <div class="info-grid">
+          <div class="info-badge">
+            <span class="badge-icon">📶</span>
+            <div>
+              <div class="badge-label">Both Peers Must Be Online</div>
+              <div class="badge-desc">Unlike cloud storage, both people need to have this page open at the same time. It's a live transfer.</div>
+            </div>
+          </div>
+          <div class="info-badge">
+            <span class="badge-icon">🏢</span>
+            <div>
+              <div class="badge-label">Some Networks May Block It</div>
+              <div class="badge-desc">Strict corporate firewalls or VPNs might prevent direct connections. If it doesn't connect, try a different network.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Connection Card -->
+  <div class="card">
+    <div class="card-title">Connection</div>
+
+    <p style="font-size:13px; color:var(--text-dim); margin-bottom:16px;">
+      Choose your role. One peer creates the offer, the other receives it.
+    </p>
+
+    <!-- Role Picker -->
+    <div class="role-picker" id="rolePicker">
+      <div class="role-card" id="role-sender" onclick="selectRole('sender')">
+        <div class="role-icon">📡</div>
+        <div class="role-name">Sender</div>
+        <div class="role-desc">I'll create the invite link</div>
+      </div>
+      <div class="role-card" id="role-receiver" onclick="selectRole('receiver')">
+        <div class="role-icon">📥</div>
+        <div class="role-name">Receiver</div>
+        <div class="role-desc">I have an invite to join</div>
+      </div>
+    </div>
+
+    <!-- Sender Steps -->
+    <div class="role-steps" id="steps-sender">
+      <div class="signal-steps">
+        <div>
+          <div class="step-label"><span class="step-num">1</span> Generate your connection offer</div>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-small" id="btnCreateOffer" onclick="createOffer()">Generate Offer</button>
+          </div>
+        </div>
+        <div id="sender-step2" class="hidden">
+          <div class="step-label"><span class="step-num">2</span> Copy this and send it to your peer</div>
+          <textarea id="localSDP" readonly placeholder="Generating..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-secondary btn-small" onclick="copySDP('localSDP')">📋 Copy to Clipboard</button>
+          </div>
+        </div>
+        <div id="sender-step3" class="hidden">
+          <div class="step-label"><span class="step-num">3</span> Paste the answer from your peer</div>
+          <textarea id="remoteSDP-sender" placeholder="Paste the receiver's answer here..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-small" onclick="acceptAnswer()">Connect</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Receiver Steps -->
+    <div class="role-steps" id="steps-receiver">
+      <div class="signal-steps">
+        <div>
+          <div class="step-label"><span class="step-num">1</span> Paste the offer from the sender</div>
+          <textarea id="remoteSDP-receiver" placeholder="Paste the sender's offer here..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-primary btn-small" onclick="acceptOffer()">Accept Offer</button>
+          </div>
+        </div>
+        <div id="receiver-step2" class="hidden">
+          <div class="step-label"><span class="step-num">2</span> Copy this answer and send it back to the sender</div>
+          <textarea id="localSDP-receiver" readonly placeholder="Generating..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-secondary btn-small" onclick="copySDP('localSDP-receiver')">📋 Copy to Clipboard</button>
+          </div>
+        </div>
+        <div id="receiver-step3" class="hidden">
+          <div class="step-label"><span class="step-num">⚡</span> Waiting for connection...</div>
+          <p style="font-size:13px; color:var(--text-dim);">Once the sender pastes your answer, you'll be connected automatically.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar">
+    <div class="status-dot disconnected" id="statusDot"></div>
+    <span id="statusText">Not connected</span>
+  </div>
+
+  <!-- File Drop Card -->
+  <div class="card" id="fileCard">
+    <div class="card-title">Send File</div>
+    <div class="dropzone" id="dropzone">
+      <div class="dropzone-icon">📁</div>
+      <div class="dropzone-text">Drop a file here or click to browse</div>
+      <div class="dropzone-hint">Files are sent directly to the peer — no server involved</div>
+      <input type="file" id="fileInput" />
+    </div>
+  </div>
+
+  <!-- Transfers Card -->
+  <div class="card hidden" id="transfersCard">
+    <div class="card-title">Transfers</div>
+    <div id="transferList"></div>
+  </div>
+
+  <!-- Log Card -->
+  <div class="card">
+    <div class="card-title">Log</div>
+    <div class="log" id="log"></div>
+  </div>
+
+   <p style="margin-top: 20px;margin-bottom: 50px;text-align: center;">
+    © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+  </p>
+</div>
+
+<script>
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:stun.stunprotocol.org:3478' },
+];
+
+const CHUNK_SIZE = 64 * 1024; // 64KB chunks
+
+let pc = null;
+let dataChannel = null;
+let selectedRole = null;
+
+// Receiving state
+let incomingFile = null;
+let receivedChunks = [];
+let receivedSize = 0;
+
+// ── Logging ──
+
+function log(msg, type = 'info') {
+  const el = document.getElementById('log');
+  const time = new Date().toLocaleTimeString('en', { hour12: false });
+  const cls = type === 'success' ? 'log-success' : type === 'error' ? 'log-error' : 'log-info';
+  el.innerHTML += `<div class="log-entry"><span class="log-time">${time}</span> <span class="${cls}">${msg}</span></div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── Status ──
+
+function setStatus(state, text) {
+  document.getElementById('statusDot').className = `status-dot ${state}`;
+  document.getElementById('statusText').textContent = text;
+}
+
+// ── Role Selection ──
+
+function selectRole(role) {
+  selectedRole = role;
+  document.getElementById('role-sender').classList.toggle('selected', role === 'sender');
+  document.getElementById('role-receiver').classList.toggle('selected', role === 'receiver');
+  document.getElementById('steps-sender').classList.toggle('active', role === 'sender');
+  document.getElementById('steps-receiver').classList.toggle('active', role === 'receiver');
+  log(`Role selected: ${role}`);
+}
+
+// ── WebRTC Setup ──
+
+function createPeerConnection() {
+  if (pc) { pc.close(); }
+
+  pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+  pc.onicecandidate = (e) => {
+    if (!e.candidate) {
+      log('ICE gathering complete');
+      // Update the appropriate SDP textarea
+      if (selectedRole === 'sender') {
+        document.getElementById('localSDP').value = JSON.stringify(pc.localDescription);
+      } else {
+        document.getElementById('localSDP-receiver').value = JSON.stringify(pc.localDescription);
+      }
+    }
+  };
+
+  pc.oniceconnectionstatechange = () => {
+    log(`ICE: ${pc.iceConnectionState}`);
+    if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+      setStatus('connected', 'Connected to peer!');
+      log('Peer connected!', 'success');
+    } else if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+      setStatus('disconnected', 'Connection lost');
+      log('Connection lost', 'error');
+    }
+  };
+
+  pc.ondatachannel = (e) => {
+    log('Received data channel');
+    dataChannel = e.channel;
+    setupDataChannel();
+  };
+
+  return pc;
+}
+
+function setupDataChannel() {
+  dataChannel.binaryType = 'arraybuffer';
+
+  dataChannel.onopen = () => {
+    log('Data channel open', 'success');
+    setStatus('connected', 'Connected — ready to share files');
+  };
+
+  dataChannel.onclose = () => {
+    log('Data channel closed');
+    setStatus('disconnected', 'Disconnected');
+  };
+
+  dataChannel.onerror = (e) => {
+    log(`Data channel error: ${e.message || 'unknown'}`, 'error');
+  };
+
+  dataChannel.onmessage = (e) => {
+    handleIncomingData(e.data);
+  };
+}
+
+function waitForICE() {
+  return new Promise((resolve) => {
+    if (pc.iceGatheringState === 'complete') return resolve();
+    const check = () => {
+      if (pc.iceGatheringState === 'complete') {
+        pc.removeEventListener('icegatheringstatechange', check);
+        resolve();
+      }
+    };
+    pc.addEventListener('icegatheringstatechange', check);
+    setTimeout(resolve, 5000);
+  });
+}
+
+// ── Sender Flow ──
+
+async function createOffer() {
+  createPeerConnection();
+
+  dataChannel = pc.createDataChannel('files');
+  setupDataChannel();
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  setStatus('connecting', 'Offer created — share it with your peer');
+  log('Offer created. Waiting for ICE candidates...');
+
+  await waitForICE();
+
+  // Reveal step 2 & 3
+  document.getElementById('sender-step2').classList.remove('hidden');
+  document.getElementById('sender-step3').classList.remove('hidden');
+  document.getElementById('btnCreateOffer').disabled = true;
+  document.getElementById('btnCreateOffer').textContent = '✓ Generated';
+  log('Offer ready. Copy and send to your peer.', 'success');
+}
+
+async function acceptAnswer() {
+  const raw = document.getElementById('remoteSDP-sender').value.trim();
+  if (!raw) { log('Paste the answer first', 'error'); return; }
+
+  try {
+    const sdp = JSON.parse(raw);
+    if (sdp.type !== 'answer') { log('Expected an answer SDP, got: ' + sdp.type, 'error'); return; }
+    await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    log('Answer accepted. Connecting...', 'success');
+    setStatus('connecting', 'Connecting...');
+  } catch (err) {
+    log(`Error: ${err.message}`, 'error');
+  }
+}
+
+// ── Receiver Flow ──
+
+async function acceptOffer() {
+  const raw = document.getElementById('remoteSDP-receiver').value.trim();
+  if (!raw) { log('Paste the offer first', 'error'); return; }
+
+  try {
+    const sdp = JSON.parse(raw);
+    if (sdp.type !== 'offer') { log('Expected an offer SDP, got: ' + sdp.type, 'error'); return; }
+
+    createPeerConnection();
+    await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    log('Generating answer...', 'info');
+    setStatus('connecting', 'Answer created — send it back to the sender');
+
+    await waitForICE();
+
+    // Reveal step 2 & 3
+    document.getElementById('receiver-step2').classList.remove('hidden');
+    document.getElementById('receiver-step3').classList.remove('hidden');
+    log('Answer ready. Copy and send back to the sender.', 'success');
+  } catch (err) {
+    log(`Error: ${err.message}`, 'error');
+  }
+}
+
+// ── Clipboard ──
+
+function copySDP(textareaId) {
+  const text = document.getElementById(textareaId).value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => log('Copied to clipboard!', 'success'));
+}
+
+// ── File Sending ──
+
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+function addTransferUI(id, name, size, direction) {
+  document.getElementById('transfersCard').classList.remove('hidden');
+  const list = document.getElementById('transferList');
+  const icon = direction === 'up' ? '↑' : '↓';
+  const html = `
+    <div class="transfer-item" id="transfer-${id}">
+      <div class="transfer-icon">${icon}</div>
+      <div class="transfer-info">
+        <div class="transfer-name">${name}</div>
+        <div class="transfer-meta">${formatBytes(size)} · ${direction === 'up' ? 'Sending' : 'Receiving'}</div>
+        <div class="transfer-progress"><div class="transfer-progress-bar" id="progress-${id}" style="width:0%"></div></div>
+      </div>
+      <div class="transfer-percent" id="percent-${id}">0%</div>
+    </div>`;
+  list.insertAdjacentHTML('afterbegin', html);
+}
+
+function updateTransferProgress(id, pct) {
+  const bar = document.getElementById(`progress-${id}`);
+  const txt = document.getElementById(`percent-${id}`);
+  if (bar) bar.style.width = pct + '%';
+  if (txt) txt.textContent = Math.round(pct) + '%';
+  if (pct >= 100) {
+    if (bar) bar.classList.add('complete');
+    if (txt) txt.style.color = 'var(--accent)';
+  }
+}
+
+async function sendFile(file) {
+  if (!dataChannel || dataChannel.readyState !== 'open') {
+    log('Not connected to a peer yet', 'error');
+    return;
+  }
+
+  const id = Date.now().toString(36);
+  log(`Sending: ${file.name} (${formatBytes(file.size)})`);
+
+  dataChannel.send(JSON.stringify({
+    type: 'file-meta',
+    id,
+    name: file.name,
+    size: file.size,
+    mime: file.type
+  }));
+
+  addTransferUI(id, file.name, file.size, 'up');
+
+  const buffer = await file.arrayBuffer();
+  let offset = 0;
+  const total = buffer.byteLength;
+
+  const sendChunk = () => {
+    while (offset < total) {
+      if (dataChannel.bufferedAmount > 10 * CHUNK_SIZE) {
+        setTimeout(sendChunk, 20);
+        return;
+      }
+      const end = Math.min(offset + CHUNK_SIZE, total);
+      dataChannel.send(buffer.slice(offset, end));
+      offset = end;
+      updateTransferProgress(id, (offset / total) * 100);
+    }
+    dataChannel.send(JSON.stringify({ type: 'file-end', id }));
+    log(`Sent: ${file.name}`, 'success');
+  };
+
+  sendChunk();
+}
+
+// ── File Receiving ──
+
+function handleIncomingData(data) {
+  if (typeof data === 'string') {
+    try {
+      const msg = JSON.parse(data);
+
+      if (msg.type === 'file-meta') {
+        incomingFile = { id: msg.id, name: msg.name, size: msg.size, mime: msg.mime };
+        receivedChunks = [];
+        receivedSize = 0;
+        addTransferUI(msg.id, msg.name, msg.size, 'down');
+        log(`Receiving: ${msg.name} (${formatBytes(msg.size)})`);
+      }
+
+      if (msg.type === 'file-end' && incomingFile) {
+        const blob = new Blob(receivedChunks, { type: incomingFile.mime || 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = incomingFile.name;
+        a.click();
+
+        updateTransferProgress(incomingFile.id, 100);
+        log(`Received: ${incomingFile.name}`, 'success');
+
+        incomingFile = null;
+        receivedChunks = [];
+        receivedSize = 0;
+      }
+    } catch (e) { /* Not JSON */ }
+  } else {
+    if (incomingFile) {
+      receivedChunks.push(data);
+      receivedSize += data.byteLength;
+      updateTransferProgress(incomingFile.id, (receivedSize / incomingFile.size) * 100);
+    }
+  }
+}
+
+// ── Drag & Drop / File Input ──
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('dragover');
+});
+
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files.length > 0) sendFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length > 0) {
+    sendFile(fileInput.files[0]);
+    fileInput.value = '';
+  }
+});
+
+// ── Info Panel Toggle ──
+
+function toggleInfo() {
+  const toggle = document.getElementById('infoToggle');
+  const body = document.getElementById('infoBody');
+  toggle.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+// ── Init ──
+log('DropLink ready. Pick a role to get started.');
+</script>
+
+</body>
+</html>
