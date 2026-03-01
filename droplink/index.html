@@ -332,7 +332,7 @@ function joinRoom() {
       peerInstance.on('open', () => {
         log('Connecting to host...', 'info');
         hint.textContent = '🔗 Found peer — connecting...';
-        const conn = peerInstance.connect(hostId, { reliable: true });
+        const conn = peerInstance.connect(hostId, { reliable: true, serialization: 'none' });
         peerConn = conn;
         setupPeerConn(conn);
       });
@@ -363,6 +363,13 @@ function resetJoinButton() {
 
 function setupPeerConn(conn) {
   conn.on('open', () => {
+    // Ensure the underlying data channel uses arraybuffer
+    if (conn.dataChannel) {
+      conn.dataChannel.binaryType = 'arraybuffer';
+    }
+    if (conn._dc) {
+      conn._dc.binaryType = 'arraybuffer';
+    }
     log('Connected — ready to share files!', 'success');
     setStatus('connected', 'Connected — ready to share files');
     document.getElementById('btnJoin').textContent = '✓ Connected';
@@ -513,14 +520,15 @@ async function sendFile(file) {
   addTransferUI(id, file.name, file.size, 'up');
 
   const buffer = await file.arrayBuffer();
+  const fullArray = new Uint8Array(buffer);
   let offset = 0;
-  const total = buffer.byteLength;
+  const total = fullArray.byteLength;
 
   const pump = () => {
     while (offset < total) {
       if (getBufferedAmount() > 10 * CHUNK_SIZE) { setTimeout(pump, 20); return; }
       const end = Math.min(offset + CHUNK_SIZE, total);
-      activeSend(buffer.slice(offset, end));
+      activeSend(fullArray.slice(offset, end));
       offset = end;
       updateProgress(id, (offset / total) * 100);
     }
@@ -534,6 +542,7 @@ async function sendFile(file) {
 // File Receiving
 // ═══════════════════════════════════════
 function handleIncomingData(data) {
+  // Handle string messages (JSON metadata)
   if (typeof data === 'string') {
     try {
       const msg = JSON.parse(data);
@@ -543,34 +552,59 @@ function handleIncomingData(data) {
         receivedSize = 0;
         addTransferUI(msg.id, msg.name, msg.size, 'down');
         log(`Receiving: ${msg.name} (${formatBytes(msg.size)})`);
+        return;
       }
-      if (msg.type === 'file-end' && incomingFile) finishReceive();
+      if (msg.type === 'file-end' && incomingFile) { finishReceive(); return; }
     } catch (e) {}
-  } else if (data instanceof ArrayBuffer) {
-    if (incomingFile) {
-      receivedChunks.push(data);
-      receivedSize += data.byteLength;
-      updateProgress(incomingFile.id, (receivedSize / incomingFile.size) * 100);
-    }
+  }
+
+  // Handle binary data — could arrive as ArrayBuffer, Uint8Array, Blob, or other typed arrays
+  if (!incomingFile) return;
+
+  let byteLength = 0;
+
+  if (data instanceof ArrayBuffer) {
+    receivedChunks.push(new Uint8Array(data));
+    byteLength = data.byteLength;
   } else if (data instanceof Blob) {
-    if (incomingFile) {
-      data.arrayBuffer().then(buf => {
-        receivedChunks.push(buf);
-        receivedSize += buf.byteLength;
-        updateProgress(incomingFile.id, (receivedSize / incomingFile.size) * 100);
-      });
-    }
+    // PeerJS sometimes wraps as Blob
+    data.arrayBuffer().then(buf => {
+      receivedChunks.push(new Uint8Array(buf));
+      receivedSize += buf.byteLength;
+      updateProgress(incomingFile.id, (receivedSize / incomingFile.size) * 100);
+    });
+    return;
+  } else if (data instanceof Uint8Array || data instanceof Int8Array) {
+    receivedChunks.push(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+    byteLength = data.byteLength;
+  } else if (ArrayBuffer.isView(data)) {
+    // Any other TypedArray (Uint16Array, Float32Array, etc)
+    receivedChunks.push(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
+    byteLength = data.byteLength;
+  }
+
+  if (byteLength > 0) {
+    receivedSize += byteLength;
+    updateProgress(incomingFile.id, (receivedSize / incomingFile.size) * 100);
   }
 }
 
 function finishReceive() {
-  const blob = new Blob(receivedChunks, { type: incomingFile.mime || 'application/octet-stream' });
+  if (!incomingFile) return;
+  // Combine all chunks into a single buffer
+  const combined = new Uint8Array(receivedSize);
+  let offset = 0;
+  for (const chunk of receivedChunks) {
+    combined.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  const blob = new Blob([combined], { type: incomingFile.mime || 'application/octet-stream' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = incomingFile.name;
   a.click();
   updateProgress(incomingFile.id, 100);
-  log(`Received: ${incomingFile.name}`, 'success');
+  log(`Received: ${incomingFile.name} (${formatBytes(receivedSize)})`, 'success');
   incomingFile = null;
   receivedChunks = [];
   receivedSize = 0;
