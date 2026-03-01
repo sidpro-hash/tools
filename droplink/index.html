@@ -175,6 +175,18 @@
     </div>
   </div>
 
+  <!-- Chat -->
+  <div class="card">
+    <div class="card-title">Chat</div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-empty" id="chatEmpty">Messages will appear here once connected</div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" />
+      <button class="btn btn-primary" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+
   <!-- Transfers -->
   <div class="card hidden" id="transfersCard">
     <div class="card-title">Transfers</div>
@@ -332,7 +344,7 @@ function joinRoom() {
       peerInstance.on('open', () => {
         log('Connecting to host...', 'info');
         hint.textContent = '🔗 Found peer — connecting...';
-        const conn = peerInstance.connect(hostId, { reliable: true, serialization: 'none' });
+        const conn = peerInstance.connect(hostId, { reliable: true, serialization: 'raw' });
         peerConn = conn;
         setupPeerConn(conn);
       });
@@ -555,6 +567,7 @@ function handleIncomingData(data) {
         return;
       }
       if (msg.type === 'file-end' && incomingFile) { finishReceive(); return; }
+      if (msg.type === 'chat' && msg.text) { appendChatBubble(msg.text, 'peer'); return; }
     } catch (e) {}
   }
 
@@ -609,6 +622,44 @@ function finishReceive() {
   receivedChunks = [];
   receivedSize = 0;
 }
+
+// ═══════════════════════════════════════
+// Chat
+// ═══════════════════════════════════════
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!isConnected()) { log('Not connected yet', 'error'); return; }
+
+  activeSend(JSON.stringify({ type: 'chat', text }));
+  appendChatBubble(text, 'me');
+  input.value = '';
+  input.focus();
+}
+
+function appendChatBubble(text, who) {
+  const container = document.getElementById('chatMessages');
+  const empty = document.getElementById('chatEmpty');
+  if (empty) empty.remove();
+
+  const time = new Date().toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${who}`;
+  bubble.innerHTML = `<div>${escapeHtml(text)}</div><div class="chat-time">${time}</div>`;
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+document.getElementById('chatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') sendChat();
+});
 
 // ═══════════════════════════════════════
 // Drag & Drop
