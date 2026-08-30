@@ -5,8 +5,8 @@
     <meta charset="utf-8" />
     <meta name="author" content="SidPro"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-    <meta name="description" content="Online PDF Editor which can merge PDFs,compress PDF,split PDF and extract text from PDF."/>
-    <meta name="keywords" content="mergePdfs,split,split pdf,extract text"/>
+    <meta name="description" content="Online PDF Editor: merge PDFs, split PDF, organize pages, extract text, convert PDF pages to images, and turn images into a PDF."/>
+    <meta name="keywords" content="mergePdfs,split,split pdf,extract text,images to pdf,pdf to image,organize pdf,rotate pdf pages"/>
     <!-- icons -->
     <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
     <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
@@ -45,11 +45,17 @@
             <li id="split-option" onclick="changeOption('split', event)">
                 <i class="fas fa-columns"></i> Split PDFs
             </li>
+            <li id="organize-option" onclick="changeOption('organize', event)">
+                <i class="fas fa-th-large"></i> Organize Pages
+            </li>
             <li id="extract-option" onclick="changeOption('extract', event)">
                 <i class="fas fa-file-alt"></i> Extract Text
             </li>
             <li id="pdf-to-image-option" onclick="changeOption('pdfToImage', event)">
                 <i class="fas fa-file-image"></i> PDF to Image
+            </li>
+            <li id="images-to-pdf-option" onclick="changeOption('imagesToPdf', event)">
+                <i class="fas fa-images"></i> Images to PDF
             </li>
         </ul>
     </div>
@@ -62,7 +68,7 @@
         <h1 id="page-title">PDF Merger</h1>
         
         <div id="drop-zone">
-            Drop PDF files here or
+            <span id="drop-zone-label">Drop PDF files here or</span>
             <button onclick="document.getElementById('file-input').click()">Select Files</button>
             <input type="file" id="file-input" accept=".pdf" multiple style="display: none">
         </div>
@@ -74,6 +80,25 @@
         <div class="page-range-inputs control-split">
             <label for="page-ranges">Enter Page Ranges (e.g., 1-5, 7-8, 15):</label>
             <input type="text" id="page-ranges" placeholder="1-5, 7-8, 15" />
+        </div>
+
+        <div class="control-organize" id="organize-board" style="display: none;">
+            <p class="option-hint">Drag pages to reorder, or use the arrows. Rotate or delete, then save.</p>
+            <div id="page-thumbs" class="page-thumbs"></div>
+        </div>
+
+        <div class="page-selector control-images-to-pdf" id="images-to-pdf-options" style="display: none;">
+            <p class="option-hint">Each image becomes one page, in the order listed.</p>
+            <label for="image-page-size">Page size</label>
+            <select id="image-page-size">
+                <option value="a4" selected>A4</option>
+                <option value="letter">Letter</option>
+                <option value="fit">Fit to image</option>
+            </select>
+            <label class="option-check" for="image-auto-orient">
+                <input type="checkbox" id="image-auto-orient" checked>
+                Rotate page to match image
+            </label>
         </div>
 
         <div class="page-selector control-extract" id="page-selector" style="display: none;">
@@ -90,7 +115,9 @@
         <div>
             <span class="control-merge"><button id="merge-button" disabled>Merge PDFs</button></span>
             <span class="control-split"><button id="split-button" disabled>Split PDF</button></span>
+            <span class="control-organize"><button id="organize-save-button" disabled>Save PDF</button></span>
             <span class="control-pdf-to-image"><button id="pdf-to-image-button" disabled>PDF To Image</button></span>
+            <span class="control-images-to-pdf"><button id="images-to-pdf-button" disabled>Create PDF</button></span>
             <button id="clear-button" disabled>Clear All</button>
         </div>
 

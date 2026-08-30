@@ -115,6 +115,66 @@ button:disabled {
     background: #f8f9fa;
     border-radius: 4px;
 }
+.option-hint {
+    margin: 0 0 10px;
+    color: #555;
+    font-size: 14px;
+}
+.page-selector select {
+    padding: 8px;
+    font-size: 16px;
+    margin: 0 12px 8px 0;
+}
+.option-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px 0 0;
+    cursor: pointer;
+}
+
+.page-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0;
+}
+.page-card {
+    width: 140px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+    cursor: grab;
+}
+.page-card.dragging {
+    opacity: 0.5;
+}
+.page-thumb-wrap {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #eee;
+}
+.page-thumb-wrap img {
+    max-width: 120px;
+    max-height: 140px;
+    transform-origin: center center;
+}
+.page-label {
+    font-size: 13px;
+    margin: 6px 0 4px;
+    color: #333;
+}
+.page-actions button {
+    padding: 4px 8px;
+    margin: 2px;
+    font-size: 13px;
+}
 
 #copy-button {
     float: right;

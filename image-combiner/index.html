@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Image Combiner</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="SidPro"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta name="description" content="Combine photos into a single image in the browser. Side by side, stacked, or a padded grid collage — no upload, no account."/>
+    <meta name="keywords" content="image combiner, merge images, combine photos, side by side images, collage, stack images, 2x2 grid"/>
+    <!-- icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+    <link rel="manifest" href="../icons/manifest.json" />
+    <!-- icons -->
+    <link href="style.css" rel="stylesheet" type="text/css" charset="utf-8" />
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Image Combiner</h1>
+            <p class="subtitle">Join photos into one image — side by side, stacked, or a padded grid. Nothing is uploaded.</p>
+        </div>
+
+        <noscript>
+            <i style="color:orange;font-size:24px;">Your browser does not support JavaScript!</i><br/>
+            <img src="../image/noscript.png" style="width:auto;height:auto;" />
+        </noscript>
+
+        <div id="drop-zone">
+            Drop image files here or
+            <button type="button" id="select-btn">Select Images</button>
+            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,.jpg,.jpeg,.png,.webp,.gif,.bmp" multiple hidden>
+        </div>
+
+        <div class="file-list" id="file-list">
+            <p>No images yet. Two is a good start; you can add more for a grid.</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label class="control-label" for="layout">Layout</label>
+                <select class="control-input" id="layout">
+                    <option value="side">Side by side (left–right)</option>
+                    <option value="stack">Stacked (top–bottom)</option>
+                    <option value="grid" selected>Grid collage</option>
+                </select>
+            </div>
+            <div class="control-group" id="cols-group">
+                <label class="control-label" for="grid-cols">Grid columns</label>
+                <select class="control-input" id="grid-cols">
+                    <option value="2" selected>2 (2×2 for four photos)</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="bg-color">Background</label>
+                <input class="control-input color" id="bg-color" type="color" value="#ffffff">
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="padding">Outer padding (px)</label>
+                <input class="control-input" id="padding" type="number" min="0" max="200" value="24">
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="gap">Gap (px)</label>
+                <input class="control-input" id="gap" type="number" min="0" max="200" value="16">
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="format">Download as</label>
+                <select class="control-input" id="format">
+                    <option value="png" selected>PNG</option>
+                    <option value="jpeg">JPEG</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="size-mode">Output size</label>
+                <select class="control-input" id="size-mode">
+                    <option value="natural" selected>Natural (from photos)</option>
+                    <option value="fit">Fit inside max size</option>
+                    <option value="exact">Exact canvas (letterbox)</option>
+                </select>
+            </div>
+            <div class="control-group size-fit">
+                <label class="control-label" for="max-width">Max width (px)</label>
+                <input class="control-input" id="max-width" type="number" min="1" max="8192" placeholder="none">
+            </div>
+            <div class="control-group size-fit">
+                <label class="control-label" for="max-height">Max height (px)</label>
+                <input class="control-input" id="max-height" type="number" min="1" max="8192" placeholder="none">
+            </div>
+            <div class="control-group size-exact">
+                <label class="control-label" for="size-preset">Preset</label>
+                <select class="control-input" id="size-preset">
+                    <option value="custom">Custom</option>
+                    <option value="1080x1080" selected>1080 × 1080 (square)</option>
+                    <option value="1920x1080">1920 × 1080 (HD)</option>
+                    <option value="1080x1920">1080 × 1920 (story)</option>
+                </select>
+            </div>
+            <div class="control-group size-exact">
+                <label class="control-label" for="exact-width">Width (px)</label>
+                <input class="control-input" id="exact-width" type="number" min="1" max="8192" value="1080">
+            </div>
+            <div class="control-group size-exact">
+                <label class="control-label" for="exact-height">Height (px)</label>
+                <input class="control-input" id="exact-height" type="number" min="1" max="8192" value="1080">
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="button" class="btn-primary" id="download-btn" disabled>Download image</button>
+            <button type="button" class="btn-secondary" id="clear-btn" disabled>Clear all</button>
+        </div>
+
+        <div class="preview-wrap">
+            <h2 class="preview-title">Preview</h2>
+            <canvas id="preview"></canvas>
+            <p class="preview-size" id="output-size" hidden></p>
+            <p class="preview-hint" id="preview-hint">Add images to see a combined preview.</p>
+        </div>
+
+        <p class="site-footer">
+            © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+        </p>
+    </div>
+    <script src="combiner.js"></script>
+</body>
+</html>
