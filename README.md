@@ -11,8 +11,9 @@ Part of [Collegeek](https://collegeek.com/). MIT licensed.
 | Tool | What it does |
 |------|----------------|
 | [JSON Genie](https://tools.collegeek.com/json-validator/) | Validate, format, and visualize JSON with a syntax-highlighted editor and tree view |
-| [OCR Magic](https://tools.collegeek.com/ocr-magic/) | Extract text from images via Tesseract.js — upload, drag-and-drop, or paste |
 | [PDF Editor](https://tools.collegeek.com/pdfeditor/) | Merge PDFs, split by page range, extract text, and convert pages to images |
+| [Markdown to PDF](https://tools.collegeek.com/md-to-pdf/) | Convert Markdown to PDF in the browser — style tables/code, custom print header/footer |
+| [OCR Magic](https://tools.collegeek.com/ocr-magic/) | Extract text from images via Tesseract.js — upload, drag-and-drop, or paste |
 | [UUID Generator](https://tools.collegeek.com/uuid-generator/) | Generate UUID v4, v1, or Nil; bulk generate up to 1,000 at once |
 | [Image Inspector](https://tools.collegeek.com/image-inspector/) | Pixel-level inspection with zoom, magnifier, coordinates, and HEX / RGB / RGBA / HSL / HSV |
 | [JSON Diff Studio](https://tools.collegeek.com/json-diff/) | Side-by-side JSON comparison with formatting, file load, and visual diffs |
@@ -27,7 +28,7 @@ Part of [Collegeek](https://collegeek.com/). MIT licensed.
 
 This is a static site. The homepage (`index.html`) lists every utility; each tool lives in its own folder with its own `index.html`, CSS, and (where needed) JavaScript.
 
-Work happens on the client. JSON parsing, PDF merge/split, OCR, password generation, and UUID creation never leave the browser. DropLink is the exception on the network side: files still never go through Collegeek — they travel peer-to-peer over WebRTC (DTLS/SRTP). A STUN server and PeerJS signaling only help the two browsers find each other.
+Work happens on the client. JSON parsing, PDF merge/split, Markdown-to-PDF (print), OCR, password generation, and UUID creation never leave the browser. DropLink is the exception on the network side: files still never go through Collegeek — they travel peer-to-peer over WebRTC (DTLS/SRTP). A STUN server and PeerJS signaling only help the two browsers find each other.
 
 Shared assets:
 

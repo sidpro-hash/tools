@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "colors": {
+    "cTableHeadBg": "#0b3d63",
+    "cTableHeadFg": "#ffffff",
+    "cTableBorder": "#d3dbe2",
+    "cTableStripe": "#f4f7fa",
+    "cCodeBg": "#1e2530",
+    "cCodeFg": "#e6e9ef",
+    "cInlineBg": "#dae5f1",
+    "cInlineFg": "#304ab0",
+    "cAccent": "#0b3d63"
+  },
+  "header": {
+    "on": true,
+    "left": "{title}",
+    "center": "",
+    "right": "",
+    "color": "#0b3d63"
+  },
+  "footer": {
+    "on": true,
+    "left": "Confidential",
+    "center": "Page {page}",
+    "right": "",
+    "color": "#666666"
+  }
+}

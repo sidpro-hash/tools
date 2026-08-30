@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Markdown to PDF</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="SidPro"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta name="description" content="Convert Markdown to PDF in the browser. Load or paste a .md file, style tables and code, add a custom header and footer, then print to PDF — no server, no upload."/>
+    <meta name="keywords" content="markdown to pdf, md to pdf, markdown converter, print markdown, markdown pdf, convert markdown"/>
+    <!-- icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="../icons/favicon-57x57.png" />
+    <link rel="apple-touch-icon" sizes="60x60" href="../icons/favicon-60x60.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="../icons/favicon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="../icons/favicon-76x76.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="../cons/favicon-114x114.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="../icons/favicon-120x120.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="../icons/favicon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../icons/favicon-180x180.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="../icons/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="../icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../icons/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/favicon-192x192.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="../icons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="../icons/browserconfig.xml" />
+    <link rel="manifest" href="../icons/manifest.json" />
+    <!-- icons -->
+<style>
+  :root {
+    --accent: #0b3d63;
+    --accent-light: #14507f;
+    --border: #d3dbe2;
+    --bg-soft: #f4f7fa;
+
+    --table-head-bg: #0b3d63;
+    --table-head-fg: #ffffff;
+    --table-border: #d3dbe2;
+    --table-stripe: #f4f7fa;
+
+    --code-bg: #1e2530;
+    --code-fg: #e6e9ef;
+    --inline-code-bg: #f4f7fa;
+    --inline-code-fg: #b03040;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #eef1f4;
+    color: #1a1a1a;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .site-footer {
+    flex-shrink: 0;
+    margin: 8px 0 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  header.top {
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 22px;
+    flex-shrink: 0;
+  }
+
+  header.top h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  header.top p { margin: 4px 0 0; font-size: 12.5px; color: #cfe0ee; }
+
+  #toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--accent);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: var(--bg-soft); }
+
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { background: var(--accent-light); }
+  .btn-ghost { border-color: transparent; color: #666; }
+
+  input[type="file"] { display: none; }
+
+  #filename { font-size: 12.5px; color: #666; margin-left: 4px; }
+
+  #tip {
+    background: #fff8e6;
+    border-bottom: 1px solid #f0deab;
+    color: #7a5c00;
+    font-size: 12px;
+    padding: 8px 22px;
+    flex-shrink: 0;
+  }
+  #tip strong { color: #5c4500; }
+
+  #main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+
+  #style-panel {
+    width: 280px;
+    flex-shrink: 0;
+    background: #fff;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 4px 0 24px;
+  }
+
+  #style-panel.collapsed { display: none; }
+
+  .panel-section {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef1f4;
+  }
+
+  .panel-section h3 {
+    margin: 0 0 10px;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #8a97a3;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .field-row label {
+    font-size: 12.5px;
+    color: #333;
+    flex: 1;
+  }
+
+  .field-row input[type="color"] {
+    width: 34px;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0;
+    cursor: pointer;
+    background: none;
+  }
+
+  .grid3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .grid3 input[type="text"] {
+    width: 100%;
+    font-size: 11.5px;
+    padding: 5px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .grid3-label {
+    grid-column: 1 / -1;
+    font-size: 10.5px;
+    color: #8a97a3;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 6px;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 12.5px;
+    color: #333;
+  }
+
+  .small-hint { font-size: 11px; color: #999; margin-top: 4px; line-height: 1.4; }
+
+  .panel-toggle-btn {
+    font-size: 12px;
+  }
+
+  #content-area { flex: 1; display: flex; min-width: 0; }
+  #content-area.dragging #editor-pane { outline: 3px dashed var(--accent-light); outline-offset: -3px; }
+
+  #editor-pane, #preview-pane { flex: 1; min-width: 0; overflow-y: auto; }
+
+  #editor-pane { border-right: 1px solid var(--border); background: #fff; display: flex; flex-direction: column; }
+
+  #editor-label, #preview-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8a97a3;
+    padding: 8px 16px 0;
+    flex-shrink: 0;
+  }
+
+  #source {
+    flex: 1;
+    border: none;
+    resize: none;
+    padding: 12px 16px;
+    font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    outline: none;
+    width: 100%;
+  }
+
+  #preview-pane { background: #eef1f4; padding: 24px; }
+
+  #preview-sheet {
+    background: #fff;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 48px;
+    min-height: 100%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  }
+
+  #empty-hint { color: #8a97a3; font-size: 13.5px; text-align: center; padding: 60px 20px; }
+
+  /* ---- Rendered markdown content styling (also used for print) ---- */
+  .md-content { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
+  .md-content h1 { font-size: 22pt; color: var(--accent); border-bottom: 3px solid var(--accent); padding-bottom: 8px; margin-top: 0; }
+  .md-content h2 { font-size: 15pt; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-top: 28px; }
+  .md-content h3 { font-size: 12.5pt; color: var(--accent-light); margin-top: 20px; }
+  .md-content h4 { font-size: 11.5pt; color: var(--accent-light); margin-top: 16px; }
+  .md-content p { margin: 8px 0; font-size: 11pt; line-height: 1.55; }
+  .md-content hr { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+  .md-content table { border-collapse: collapse; width: 100%; margin: 12px 0 18px; font-size: 9.5pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .md-content th { background: var(--table-head-bg); color: var(--table-head-fg); text-align: left; padding: 6px 8px; border: 1px solid var(--table-border); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .md-content td { padding: 5px 8px; border: 1px solid var(--table-border); vertical-align: top; font-size: 9.5pt; overflow-wrap: break-word; }
+  .md-content tr:nth-child(even) td { background: var(--table-stripe); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .md-content code { font-family: Menlo, Consolas, monospace; background: var(--inline-code-bg); color: var(--inline-code-fg); padding: 1px 4px; border-radius: 3px; font-size: 9.5pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow-wrap: anywhere; }
+  .md-content pre { background: var(--code-bg); color: var(--code-fg); padding: 10px 12px; border-radius: 5px; font-size: 9pt; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+  .md-content pre code { background: transparent; color: inherit; padding: 0; white-space: inherit; overflow-wrap: inherit; word-break: inherit; }
+
+  .md-content a { color: var(--accent-light); text-decoration: none; }
+  .md-content ul, .md-content ol { margin: 6px 0; padding-left: 22px; font-size: 11pt; }
+  .md-content li { margin: 3px 0; }
+  .md-content strong { color: var(--accent); }
+  .md-content blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent-light); color: #444; background: var(--bg-soft); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .md-content img { max-width: 100%; }
+
+  @media print {
+    .site-footer { display: none !important; }
+    body * { visibility: hidden; }
+    #preview-sheet, #preview-sheet * { visibility: visible; }
+    #preview-sheet {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      max-width: none;
+      box-shadow: none;
+      padding: 0;
+      margin: 0;
+    }
+    .md-content pre, .md-content table, .md-content blockquote { break-inside: avoid; }
+    .md-content h1, .md-content h2, .md-content h3, .md-content h4 { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="top">
+    <h1>Markdown to PDF</h1>
+    <p>Load or paste a .md file, style it, then print to PDF — no server, no upload, everything runs in this page.</p>
+  </header>
+  <noscript>
+    <i style="color:orange;font-size:24px;">Your browser does not support JavaScript!</i><br/>
+    <img src="../image/noscript.png" style="width:auto;height:auto;" />
+  </noscript>
+
+  <div id="toolbar">
+    <button class="btn btn-primary" id="btnOpen">Open .md file…</button>
+    <input type="file" id="fileInput" accept=".md,.markdown,.mdown,.txt">
+    <button class="btn" id="btnSample">Load sample</button>
+    <button class="btn" id="btnClear">Clear</button>
+    <button class="btn btn-ghost panel-toggle-btn" id="btnToggleStyle">Style &amp; header/footer ▸</button>
+    <span id="filename">No file loaded</span>
+    <span style="flex:1"></span>
+    <button class="btn" id="btnResetStyle">Reset style</button>
+    <button class="btn" id="btnDownloadHtml">Download HTML</button>
+    <button class="btn btn-primary" id="btnPrint">Print / Save as PDF</button>
+  </div>
+
+  <div id="tip">
+    <strong>Before printing:</strong> in the print dialog's "More settings", turn <strong>Background graphics ON</strong> so table/code colors print, and turn <strong>Headers and footers OFF</strong> so only the custom header/footer below shows (not the browser's own URL/date).
+  </div>
+
+  <div id="main">
+    <div id="style-panel" class="collapsed">
+
+      <div class="panel-section">
+        <h3>Table colors</h3>
+        <div class="field-row"><label>Header background</label><input type="color" id="cTableHeadBg" value="#0b3d63"></div>
+        <div class="field-row"><label>Header text</label><input type="color" id="cTableHeadFg" value="#ffffff"></div>
+        <div class="field-row"><label>Border</label><input type="color" id="cTableBorder" value="#d3dbe2"></div>
+        <div class="field-row"><label>Row stripe</label><input type="color" id="cTableStripe" value="#f4f7fa"></div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Code colors</h3>
+        <div class="field-row"><label>Code block background</label><input type="color" id="cCodeBg" value="#1e2530"></div>
+        <div class="field-row"><label>Code block text</label><input type="color" id="cCodeFg" value="#e6e9ef"></div>
+        <div class="field-row"><label>Inline code background</label><input type="color" id="cInlineBg" value="#f4f7fa"></div>
+        <div class="field-row"><label>Inline code text</label><input type="color" id="cInlineFg" value="#b03040"></div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Accent (headings &amp; links)</h3>
+        <div class="field-row"><label>Accent color</label><input type="color" id="cAccent" value="#0b3d63"></div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Print header</h3>
+        <div class="toggle-row"><input type="checkbox" id="hfHeaderOn"> Show custom header on every page</div>
+        <div class="grid3">
+          <div class="grid3-label">Left</div><div class="grid3-label">Center</div><div class="grid3-label">Right</div>
+          <input type="text" id="hLeft" placeholder="Company">
+          <input type="text" id="hCenter" placeholder="">
+          <input type="text" id="hRight" placeholder="Doc title">
+        </div>
+        <div class="field-row"><label>Text color</label><input type="color" id="cHeaderFg" value="#0b3d63"></div>
+        <div class="small-hint">Tokens: {title} = first heading, {date} = today's date.</div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Print footer</h3>
+        <div class="toggle-row"><input type="checkbox" id="hfFooterOn"> Show custom footer on every page</div>
+        <div class="grid3">
+          <div class="grid3-label">Left</div><div class="grid3-label">Center</div><div class="grid3-label">Right</div>
+          <input type="text" id="fLeft" placeholder="Confidential">
+          <input type="text" id="fCenter" placeholder="Page {page} of {pages}">
+          <input type="text" id="fRight" placeholder="{date}">
+        </div>
+        <div class="field-row"><label>Text color</label><input type="color" id="cFooterFg" value="#666666"></div>
+        <div class="small-hint">Tokens: {page}, {pages}, {title}, {date}. These render when you open the print dialog — not in the on-screen preview.</div>
+      </div>
+
+      <div class="panel-section">
+        <h3>Settings file</h3>
+        <button class="btn" id="btnExportSettings" style="width:100%; margin-bottom:8px;">Export settings…</button>
+        <button class="btn" id="btnImportSettings" style="width:100%;">Import settings…</button>
+        <input type="file" id="settingsFileInput" accept="application/json,.json">
+        <div class="small-hint">Saves/loads all colors and header/footer text as a small .json file, so you can reuse the same look next time or share it with a teammate.</div>
+      </div>
+
+    </div>
+
+    <div id="content-area">
+      <div id="editor-pane">
+        <div id="editor-label">Markdown source (editable)</div>
+        <textarea id="source" spellcheck="false" placeholder="Paste Markdown here, or drag a .md file onto this window…"></textarea>
+      </div>
+      <div id="preview-pane">
+        <div id="preview-label" style="padding-left:0; text-align:center;">Preview (this is what prints)</div>
+        <div id="preview-sheet">
+          <div id="empty-hint">Nothing to preview yet. Open a file, load the sample, or start typing on the left.</div>
+          <div class="md-content" id="preview" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+    <p class="site-footer">
+        © Copyright 2020-<script>document.write(new Date().getFullYear())</script> by <a href="https://collegeek.com/" ><b><span style="font-size:20px;">C</span>ollegeek</b></a>. All Rights Reserved.
+    </p>
+
+<style id="dynamic-page-style"></style>
+
+<script>
+// ============================================================
+// Vanilla-JS Markdown -> HTML parser (no dependencies)
+// ============================================================
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function inlineFormat(text) {
+  text = escapeHtml(text);
+
+  const codeStash = [];
+  text = text.replace(/`([^`]+)`/g, function(m, code) {
+    codeStash.push(code);
+    return ' CODE' + (codeStash.length - 1) + ' ';
+  });
+
+  text = text.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,
+    function(m, alt, url, title) { return '<img src="' + url + '" alt="' + alt + '"' + (title ? ' title="' + title + '"' : '') + '>'; });
+
+  text = text.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,
+    function(m, label, url, title) { return '<a href="' + url + '"' + (title ? ' title="' + title + '"' : '') + ' target="_blank" rel="noopener">' + label + '</a>'; });
+
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+
+  text = text.replace(/(^|[^*])\*([^*]+)\*(?!\*)/g, '$1<em>$2</em>');
+  text = text.replace(/(^|[^_])_([^_]+)_(?!_)/g, '$1<em>$2</em>');
+
+  text = text.replace(/ CODE(\d+) /g, function(m, idx) { return '<code>' + codeStash[+idx] + '</code>'; });
+
+  return text;
+}
+
+function splitTableRow(line) {
+  let row = line.trim();
+  if (row.charAt(0) === '|') row = row.slice(1);
+  if (row.charAt(row.length - 1) === '|') row = row.slice(0, -1);
+  const cells = [];
+  let cur = '';
+  for (let k = 0; k < row.length; k++) {
+    const ch = row[k];
+    if (ch === '\\' && row[k + 1] === '|') { cur += '|'; k++; continue; }
+    if (ch === '|') { cells.push(cur.trim()); cur = ''; continue; }
+    cur += ch;
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+function isTableSeparator(line) {
+  return /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$/.test(line);
+}
+
+function isListLine(line) {
+  return /^(\s*)([-*+]|\d+[.)])\s+/.test(line);
+}
+
+function isBlank(line) {
+  return /^\s*$/.test(line);
+}
+
+function isBlockStart(line) {
+  return isBlank(line) ||
+    /^(```|~~~)/.test(line) ||
+    /^#{1,6}\s+/.test(line) ||
+    /^ {0,3}(-{3,}|\*{3,}|_{3,})\s*$/.test(line) ||
+    /^\s{0,3}>/.test(line) ||
+    isListLine(line);
+}
+
+function parseListBlock(lines, startIndex) {
+  const stack = [];
+  let output = '';
+  let i = startIndex;
+
+  function closeUntil(indent) {
+    while (stack.length && stack[stack.length - 1].indent > indent) {
+      const top = stack.pop();
+      const listHtml = '<' + top.type + '>' + top.items.map(function(c) { return '<li>' + c + '</li>'; }).join('') + '</' + top.type + '>';
+      if (stack.length) {
+        const parent = stack[stack.length - 1];
+        parent.items[parent.items.length - 1] += listHtml;
+      } else {
+        output += listHtml;
+      }
+    }
+  }
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const m = line.match(/^(\s*)([-*+]|\d+[.)])\s+(.*)$/);
+
+    if (!m) {
+      if (isBlank(line)) {
+        let j = i + 1;
+        while (j < lines.length && isBlank(lines[j])) j++;
+        if (j < lines.length && isListLine(lines[j])) { i++; continue; }
+        else break;
+      } else {
+        const indent = (line.match(/^(\s*)/) || ['', ''])[1].length;
+        if (stack.length && indent >= stack[stack.length - 1].indent + 1) {
+          const top = stack[stack.length - 1];
+          top.items[top.items.length - 1] += ' ' + inlineFormat(line.trim());
+          i++; continue;
+        } else break;
+      }
+    } else {
+      const indent = m[1].length;
+      const marker = m[2];
+      const content = m[3];
+      const type = /\d/.test(marker) ? 'ol' : 'ul';
+
+      closeUntil(indent);
+
+      if (!stack.length || stack[stack.length - 1].indent < indent) {
+        stack.push({ indent: indent, type: type, items: [] });
+      } else if (stack[stack.length - 1].type !== type) {
+        closeUntil(indent - 1);
+        stack.push({ indent: indent, type: type, items: [] });
+      }
+      stack[stack.length - 1].items.push(inlineFormat(content));
+      i++;
+    }
+  }
+  closeUntil(-1);
+  return { html: output, next: i };
+}
+
+function markdownToHtml(src) {
+  src = src.replace(/\r\n?/g, '\n');
+  const lines = src.split('\n');
+  const n = lines.length;
+  let html = '';
+  let i = 0;
+
+  while (i < n) {
+    const line = lines[i];
+
+    if (isBlank(line)) { i++; continue; }
+
+    const fence = line.match(/^(```|~~~)(.*)$/);
+    if (fence) {
+      const marker = fence[1];
+      const lang = fence[2].trim();
+      const codeLines = [];
+      i++;
+      while (i < n && lines[i].indexOf(marker) !== 0) { codeLines.push(lines[i]); i++; }
+      i++;
+      const langClass = lang ? ' class="language-' + escapeHtml(lang) + '"' : '';
+      html += '<pre><code' + langClass + '>' + escapeHtml(codeLines.join('\n')) + '</code></pre>\n';
+      continue;
+    }
+
+    const heading = line.match(/^(#{1,6})\s+(.*)$/);
+    if (heading) {
+      const level = heading[1].length;
+      const text = heading[2].replace(/\s+#+\s*$/, '');
+      const id = text.replace(/<[^>]*>/g, '').toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
+      html += '<h' + level + ' id="' + id + '">' + inlineFormat(text) + '</h' + level + '>\n';
+      i++; continue;
+    }
+
+    if (/^ {0,3}(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) { html += '<hr>\n'; i++; continue; }
+
+    if (/^\s{0,3}>/.test(line)) {
+      const quoteLines = [];
+      while (i < n && /^\s{0,3}>/.test(lines[i])) {
+        quoteLines.push(lines[i].replace(/^\s{0,3}>\s?/, ''));
+        i++;
+      }
+      html += '<blockquote>' + markdownToHtml(quoteLines.join('\n')) + '</blockquote>\n';
+      continue;
+    }
+
+    if (line.indexOf('|') !== -1 && i + 1 < n && isTableSeparator(lines[i + 1])) {
+      const headerCells = splitTableRow(line);
+      const alignRow = splitTableRow(lines[i + 1]);
+      const aligns = alignRow.map(function(c) {
+        const left = c.charAt(0) === ':', right = c.charAt(c.length - 1) === ':';
+        if (left && right) return 'center';
+        if (right) return 'right';
+        if (left) return 'left';
+        return '';
+      });
+      i += 2;
+      const bodyRows = [];
+      while (i < n && lines[i].indexOf('|') !== -1 && !isBlank(lines[i])) {
+        bodyRows.push(splitTableRow(lines[i]));
+        i++;
+      }
+      let t = '<table><thead><tr>';
+      headerCells.forEach(function(c, idx) {
+        const st = aligns[idx] ? ' style="text-align:' + aligns[idx] + '"' : '';
+        t += '<th' + st + '>' + inlineFormat(c) + '</th>';
+      });
+      t += '</tr></thead><tbody>';
+      bodyRows.forEach(function(r) {
+        t += '<tr>';
+        r.forEach(function(c, idx) {
+          const st = aligns[idx] ? ' style="text-align:' + aligns[idx] + '"' : '';
+          t += '<td' + st + '>' + inlineFormat(c) + '</td>';
+        });
+        t += '</tr>';
+      });
+      t += '</tbody></table>\n';
+      html += t;
+      continue;
+    }
+
+    if (isListLine(line)) {
+      const res = parseListBlock(lines, i);
+      html += res.html + '\n';
+      i = res.next;
+      continue;
+    }
+
+    const paraLines = [];
+    while (i < n && !isBlockStart(lines[i])) { paraLines.push(lines[i]); i++; }
+    if (paraLines.length) {
+      html += '<p>' + inlineFormat(paraLines.join(' ').trim()) + '</p>\n';
+    }
+  }
+
+  return html;
+}
+
+// ============================================================
+// UI wiring
+// ============================================================
+const sourceEl = document.getElementById('source');
+const previewEl = document.getElementById('preview');
+const emptyHint = document.getElementById('empty-hint');
+const filenameEl = document.getElementById('filename');
+const fileInput = document.getElementById('fileInput');
+const contentArea = document.getElementById('content-area');
+const stylePanel = document.getElementById('style-panel');
+const dynStyle = document.getElementById('dynamic-page-style');
+
+let currentTitle = 'document';
+let renderTimer = null;
+
+function render() {
+  const src = sourceEl.value;
+  if (!src.trim()) {
+    previewEl.style.display = 'none';
+    emptyHint.style.display = 'block';
+    document.title = 'Markdown to PDF';
+    updatePageStyle();
+    return;
+  }
+  emptyHint.style.display = 'none';
+  previewEl.style.display = 'block';
+  previewEl.innerHTML = markdownToHtml(src);
+
+  const h1 = previewEl.querySelector('h1, h2');
+  currentTitle = h1 ? h1.textContent.trim() : currentTitle;
+  document.title = currentTitle;
+  updatePageStyle();
+}
+
+function scheduleRender() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(render, 150);
+}
+
+sourceEl.addEventListener('input', scheduleRender);
+
+document.getElementById('btnOpen').addEventListener('click', function() { fileInput.click(); });
+
+fileInput.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  loadFile(file);
+});
+
+function loadFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    sourceEl.value = e.target.result;
+    filenameEl.textContent = file.name;
+    currentTitle = file.name.replace(/\.(md|markdown|mdown|txt)$/i, '');
+    render();
+  };
+  reader.readAsText(file);
+}
+
+['dragenter', 'dragover'].forEach(function(evt) {
+  contentArea.addEventListener(evt, function(e) { e.preventDefault(); contentArea.classList.add('dragging'); });
+});
+['dragleave', 'drop'].forEach(function(evt) {
+  contentArea.addEventListener(evt, function(e) { e.preventDefault(); contentArea.classList.remove('dragging'); });
+});
+contentArea.addEventListener('drop', function(e) {
+  const file = e.dataTransfer.files[0];
+  if (file) loadFile(file);
+});
+
+document.getElementById('btnClear').addEventListener('click', function() {
+  sourceEl.value = '';
+  filenameEl.textContent = 'No file loaded';
+  fileInput.value = '';
+  render();
+});
+
+document.getElementById('btnSample').addEventListener('click', function() {
+  sourceEl.value = SAMPLE_MD;
+  filenameEl.textContent = 'sample.md';
+  currentTitle = 'sample';
+  render();
+});
+
+document.getElementById('btnPrint').addEventListener('click', function() {
+  if (!sourceEl.value.trim()) {
+    alert('Load or paste some Markdown first.');
+    return;
+  }
+  window.print();
+});
+
+document.getElementById('btnToggleStyle').addEventListener('click', function() {
+  const collapsed = stylePanel.classList.toggle('collapsed');
+  this.textContent = collapsed ? 'Style & header/footer ▸' : 'Style & header/footer ▾';
+});
+
+document.getElementById('btnDownloadHtml').addEventListener('click', function() {
+  if (!sourceEl.value.trim()) {
+    alert('Load or paste some Markdown first.');
+    return;
+  }
+  const varStyle = document.documentElement.getAttribute('style') || '';
+  const baseStyles = document.querySelector('head style').textContent;
+  const doc = '<!DOCTYPE html><html style="' + varStyle + '"><head><meta charset="utf-8"><title>' + currentTitle +
+    '</title><style>' + baseStyles + '</style></head><body><div id="preview-sheet"><div class="md-content">' +
+    previewEl.innerHTML + '</div></div></body></html>';
+  const blob = new Blob([doc], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (currentTitle || 'document') + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// ---- Style panel: colors ----
+const colorInputs = {
+  cTableHeadBg: '--table-head-bg',
+  cTableHeadFg: '--table-head-fg',
+  cTableBorder: '--table-border',
+  cTableStripe: '--table-stripe',
+  cCodeBg: '--code-bg',
+  cCodeFg: '--code-fg',
+  cInlineBg: '--inline-code-bg',
+  cInlineFg: '--inline-code-fg',
+  cAccent: '--accent'
+};
+
+Object.keys(colorInputs).forEach(function(id) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', function() {
+    document.documentElement.style.setProperty(colorInputs[id], el.value);
+    if (id === 'cAccent') {
+      document.documentElement.style.setProperty('--accent-light', el.value);
+    }
+    updatePageStyle();
+  });
+});
+
+document.getElementById('btnResetStyle').addEventListener('click', function() {
+  Object.keys(colorInputs).forEach(function(id) {
+    document.documentElement.style.removeProperty(colorInputs[id]);
+  });
+  document.documentElement.style.removeProperty('--accent-light');
+  document.getElementById('cTableHeadBg').value = '#0b3d63';
+  document.getElementById('cTableHeadFg').value = '#ffffff';
+  document.getElementById('cTableBorder').value = '#d3dbe2';
+  document.getElementById('cTableStripe').value = '#f4f7fa';
+  document.getElementById('cCodeBg').value = '#1e2530';
+  document.getElementById('cCodeFg').value = '#e6e9ef';
+  document.getElementById('cInlineBg').value = '#f4f7fa';
+  document.getElementById('cInlineFg').value = '#b03040';
+  document.getElementById('cAccent').value = '#0b3d63';
+  document.getElementById('hfHeaderOn').checked = false;
+  document.getElementById('hfFooterOn').checked = false;
+  ['hLeft','hCenter','hRight','fLeft','fCenter','fRight'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('cHeaderFg').value = '#0b3d63';
+  document.getElementById('cFooterFg').value = '#666666';
+  updatePageStyle();
+});
+
+// ---- Header / footer via @page margin boxes ----
+const hfFields = ['hfHeaderOn', 'hfFooterOn', 'hLeft', 'hCenter', 'hRight', 'fLeft', 'fCenter', 'fRight', 'cHeaderFg', 'cFooterFg'];
+hfFields.forEach(function(id) {
+  document.getElementById(id).addEventListener('input', updatePageStyle);
+  document.getElementById(id).addEventListener('change', updatePageStyle);
+});
+
+function escapeCssString(s) {
+  return String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function todayStr() {
+  const d = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function resolveTokens(template) {
+  return template
+    .replace(/\{title\}/g, currentTitle || 'document')
+    .replace(/\{date\}/g, todayStr());
+}
+
+function contentValue(template) {
+  if (!template) return null;
+  template = resolveTokens(template);
+  const parts = template.split(/(\{page\}|\{pages\})/g).filter(function(p) { return p !== ''; });
+  const cssParts = parts.map(function(p) {
+    if (p === '{page}') return 'counter(page)';
+    if (p === '{pages}') return 'counter(pages)';
+    return '"' + escapeCssString(p) + '"';
+  });
+  return cssParts.length ? cssParts.join(' ') : null;
+}
+
+function updatePageStyle() {
+  const headerOn = document.getElementById('hfHeaderOn').checked;
+  const footerOn = document.getElementById('hfFooterOn').checked;
+  const headerFg = document.getElementById('cHeaderFg').value;
+  const footerFg = document.getElementById('cFooterFg').value;
+
+  const hLeft = contentValue(document.getElementById('hLeft').value);
+  const hCenter = contentValue(document.getElementById('hCenter').value);
+  const hRight = contentValue(document.getElementById('hRight').value);
+  const fLeft = contentValue(document.getElementById('fLeft').value);
+  const fCenter = contentValue(document.getElementById('fCenter').value);
+  const fRight = contentValue(document.getElementById('fRight').value);
+
+  let css = '@media print {\n@page {\nmargin: ' +
+    (headerOn ? '22mm' : '18mm') + ' 15mm ' + (footerOn ? '20mm' : '18mm') + ';\n';
+
+  function box(name, value, color) {
+    if (!value) return '';
+    return '@' + name + ' { content: ' + value + '; font-size: 9px; color: ' + color + '; font-family: -apple-system, Helvetica, Arial, sans-serif; }\n';
+  }
+
+  if (headerOn) {
+    css += box('top-left', hLeft, headerFg);
+    css += box('top-center', hCenter, headerFg);
+    css += box('top-right', hRight, headerFg);
+  }
+  if (footerOn) {
+    css += box('bottom-left', fLeft, footerFg);
+    css += box('bottom-center', fCenter, footerFg);
+    css += box('bottom-right', fRight, footerFg);
+  }
+
+  css += '}\n}';
+  dynStyle.textContent = css;
+}
+
+// ---- Import / export all settings & style as a .json file ----
+function collectSettings() {
+  const settings = { version: 1, colors: {}, header: {}, footer: {} };
+  Object.keys(colorInputs).forEach(function(id) {
+    settings.colors[id] = document.getElementById(id).value;
+  });
+  settings.header = {
+    on: document.getElementById('hfHeaderOn').checked,
+    left: document.getElementById('hLeft').value,
+    center: document.getElementById('hCenter').value,
+    right: document.getElementById('hRight').value,
+    color: document.getElementById('cHeaderFg').value
+  };
+  settings.footer = {
+    on: document.getElementById('hfFooterOn').checked,
+    left: document.getElementById('fLeft').value,
+    center: document.getElementById('fCenter').value,
+    right: document.getElementById('fRight').value,
+    color: document.getElementById('cFooterFg').value
+  };
+  return settings;
+}
+
+function applySettings(settings) {
+  if (!settings || typeof settings !== 'object') throw new Error('This file does not look like a settings export.');
+
+  if (settings.colors) {
+    Object.keys(settings.colors).forEach(function(id) {
+      const el = document.getElementById(id);
+      const cssVar = colorInputs[id];
+      const value = settings.colors[id];
+      if (!el || !cssVar || typeof value !== 'string') return;
+      el.value = value;
+      document.documentElement.style.setProperty(cssVar, value);
+      if (id === 'cAccent') document.documentElement.style.setProperty('--accent-light', value);
+    });
+  }
+
+  if (settings.header) {
+    document.getElementById('hfHeaderOn').checked = !!settings.header.on;
+    document.getElementById('hLeft').value = settings.header.left || '';
+    document.getElementById('hCenter').value = settings.header.center || '';
+    document.getElementById('hRight').value = settings.header.right || '';
+    if (settings.header.color) document.getElementById('cHeaderFg').value = settings.header.color;
+  }
+
+  if (settings.footer) {
+    document.getElementById('hfFooterOn').checked = !!settings.footer.on;
+    document.getElementById('fLeft').value = settings.footer.left || '';
+    document.getElementById('fCenter').value = settings.footer.center || '';
+    document.getElementById('fRight').value = settings.footer.right || '';
+    if (settings.footer.color) document.getElementById('cFooterFg').value = settings.footer.color;
+  }
+
+  render();
+  updatePageStyle();
+}
+
+document.getElementById('btnExportSettings').addEventListener('click', function() {
+  const settings = collectSettings();
+  const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'md-to-pdf-settings.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btnImportSettings').addEventListener('click', function() {
+  document.getElementById('settingsFileInput').click();
+});
+
+document.getElementById('settingsFileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const settings = JSON.parse(ev.target.result);
+      applySettings(settings);
+    } catch (err) {
+      alert('Could not read this settings file:\n' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+const SAMPLE_MD = [
+  '# Sample Document',
+  '',
+  '*Version 1.0 — a quick tour of what this converter supports.*',
+  '',
+  '## Formatting',
+  '',
+  'You get **bold**, *italic*, `inline code`, and [links](https://example.com).',
+  '',
+  '## Lists',
+  '',
+  '- First item',
+  '- Second item',
+  '  - Nested item A',
+  '  - Nested item B',
+  '- Third item',
+  '',
+  '1. Step one',
+  '2. Step two',
+  '3. Step three',
+  '',
+  '## Table',
+  '',
+  '| Field | Type | Required |',
+  '|---|:---:|---:|',
+  '| name | String | Yes |',
+  '| age | Integer | No |',
+  '',
+  '## Code',
+  '',
+  '```json',
+  '{',
+  '  "status": "SUCCESS",',
+  '  "data": { "id": 123 }',
+  '}',
+  '```',
+  '',
+  '> Blockquotes render like this.',
+  '',
+  '---',
+  '',
+  'Click **Print / Save as PDF** above, then choose "Save as PDF" as the destination in the print dialog. Try the Style panel to customize colors, and turn on a custom header/footer with page numbers.'
+].join('\n');
+
+updatePageStyle();
+render();
+</script>
+</body>
+</html>
