@@ -64,3 +64,14 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# IDEs
+.idea/
+.vscode/
+.cursor/
+.cursorrules
+.claude/
+
+AGENTS.md
+CLAUDE.md
+.gitnexus/
