@@ -251,6 +251,8 @@
   .chip.sent .chip-name { opacity: 0.7; }
   .chip.error { border-color: var(--danger); }
   .chip.error .chip-icon, .chip.error .chip-state { color: var(--danger); }
+  .chip-remove { border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 14px; line-height: 1; padding: 0 0 0 2px; }
+  .chip-remove:hover { color: var(--danger); }
 
   .hidden { display: none !important; }
 
@@ -268,4 +270,6 @@
   .chip.recv.receiving .chip-bar { background: #7f9bff; }
   .chip.recv.received { cursor: pointer; transition: border-color 0.2s, background 0.2s; }
   .chip.recv.received:hover { border-color: var(--accent); background: var(--accent-dim); }
+  .chip.recv.needs-save { border-color: var(--accent); }
+  .chip.recv.needs-save .chip-state { color: var(--accent); }
   .send-queue + .send-queue { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }

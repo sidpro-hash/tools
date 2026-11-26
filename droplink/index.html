@@ -577,7 +577,7 @@ async function processQueue() {
       item.status = 'sent';
     } catch (e) {
       item.status = 'error';
-      log(`Failed: ${item.file.name} — ${e.message}`, 'error');
+      log(`Failed: ${escapeHtml(item.file.name)} — ${escapeHtml(e.message)}`, 'error');
     }
     renderChips();
   }
@@ -590,7 +590,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 // Sends one file; resolves when its last chunk + file-end are handed to the channel
 async function sendFile(item) {
   const { id, file } = item;
-  log(`Sending: ${file.name} (${formatBytes(file.size)})`);
+  log(`Sending: ${escapeHtml(file.name)} (${formatBytes(file.size)})`);
 
   activeSend(JSON.stringify({ type: 'file-meta', id, name: file.name, size: file.size, mime: file.type }));
   addTransferUI(id, file.name, file.size, 'up');
@@ -614,7 +614,7 @@ async function sendFile(item) {
   }
   activeSend(JSON.stringify({ type: 'file-end', id }));
   updateProgress(id, 100);
-  log(`Sent: ${file.name}`, 'success');
+  log(`Sent: ${escapeHtml(file.name)}`, 'success');
 }
 
 // ── Chips ──
@@ -631,6 +631,7 @@ function renderChips() {
       <span class="chip-icon">${CHIP_ICON[q.status]}</span>
       <span class="chip-name">${escapeHtml(q.file.name)}</span>
       <span class="chip-state" id="chip-state-${q.id}">${q.status === 'sending' ? Math.round(q.pct) + '%' : CHIP_LABEL[q.status]}</span>
+      ${q.status === 'queued' ? `<button type="button" class="chip-remove" onclick="event.stopPropagation(); removeQueuedFile('${q.id}')" title="Remove from queue">&times;</button>` : ''}
       ${q.status === 'sending' ? `<span class="chip-bar" id="chip-bar-${q.id}" style="width:${q.pct}%"></span>` : ''}
     </div>`).join('');
 
@@ -653,6 +654,13 @@ function clearFinishedChips() {
   for (let i = sendQueue.length - 1; i >= 0; i--) {
     if (sendQueue[i].status === 'sent' || sendQueue[i].status === 'error') sendQueue.splice(i, 1);
   }
+  renderChips();
+}
+
+function removeQueuedFile(id) {
+  const index = sendQueue.findIndex(q => q.id === id);
+  if (index === -1 || sendQueue[index].status !== 'queued') return;
+  sendQueue.splice(index, 1);
   renderChips();
 }
 
@@ -731,14 +739,20 @@ function finishReceive() {
   }
   const blob = new Blob([combined], { type: incomingFile.mime || 'application/octet-stream' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = incomingFile.name;
-  a.click();
+  // Browsers often allow only one automatic download per visit. Save the first
+  // file immediately; later files stay on the chip until the user clicks Save.
+  const autoSave = !didAutoSave;
+  if (autoSave) {
+    didAutoSave = true;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = incomingFile.name;
+    a.click();
+  }
   updateProgress(incomingFile.id, 100);
 
   const item = recvQueue.find(r => r.id === incomingFile.id);
-  if (item) { item.status = 'received'; item.pct = 100; item.url = url; item.size = receivedSize; }
+  if (item) { item.status = 'received'; item.pct = 100; item.url = url; item.size = receivedSize; item.autoSaved = autoSave; }
   renderRecvChips();
 
   log(`Received: ${escapeHtml(incomingFile.name)} (${formatBytes(receivedSize)})`, 'success');
@@ -748,7 +762,8 @@ function finishReceive() {
 }
 
 // ── Received chips ──
-const recvQueue = [];   // [{ id, name, size, status: 'receiving'|'received'|'error', pct, url }]
+const recvQueue = [];   // [{ id, name, size, status: 'receiving'|'received'|'error', pct, url, autoSaved }]
+let didAutoSave = false;
 const RECV_ICON = { receiving: '⇣', received: '✓', error: '✕' };
 
 function failIncoming(reason) {
@@ -766,11 +781,13 @@ function renderRecvChips() {
 
   document.getElementById('recvChipList').innerHTML = recvQueue.map(r => {
     const state = r.status === 'receiving' ? Math.round(r.pct) + '%'
-                : r.status === 'received' ? formatBytes(r.size)
+                : r.status === 'received' ? (r.autoSaved ? formatBytes(r.size) : 'Save')
                 : (r.reason || 'Failed');
-    const tip = r.status === 'received' ? 'Click to download again' : `${formatBytes(r.size)}`;
+    const tip = r.status === 'received'
+      ? (r.autoSaved ? 'Click to download again' : 'Click to save')
+      : `${formatBytes(r.size)}`;
     return `
-    <div class="chip recv ${r.status}" id="rchip-${r.id}" title="${escapeHtml(r.name)} · ${tip}"
+    <div class="chip recv ${r.status}${r.status === 'received' && !r.autoSaved ? ' needs-save' : ''}" id="rchip-${r.id}" title="${escapeHtml(r.name)} · ${tip}"
          ${r.status === 'received' ? `onclick="redownload('${r.id}')"` : ''}>
       <span class="chip-icon">${RECV_ICON[r.status]}</span>
       <span class="chip-name">${escapeHtml(r.name)}</span>
@@ -800,6 +817,10 @@ function redownload(id) {
   if (!r || !r.url) return;
   const a = document.createElement('a');
   a.href = r.url; a.download = r.name; a.click();
+  if (!r.autoSaved) {
+    r.autoSaved = true;
+    renderRecvChips();
+  }
 }
 
 function clearReceivedChips() {
@@ -809,6 +830,7 @@ function clearReceivedChips() {
       recvQueue.splice(i, 1);
     }
   }
+  if (!recvQueue.some(r => r.autoSaved)) didAutoSave = false;
   renderRecvChips();
 }
 
