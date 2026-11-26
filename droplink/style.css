@@ -1,4 +1,4 @@
- *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
     --bg: #0a0a0f;
@@ -232,6 +232,26 @@
   .info-method-label::before { content: ''; flex: 1; height: 1px; background: var(--border); }
   .info-method-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
+  /* Send queue chips */
+  .send-queue { margin-top: 16px; }
+  .send-queue-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; font-size: 12px; color: var(--text-dim); min-width: 0; }
+  .send-queue-head > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .send-queue-head strong { color: var(--accent); font-weight: 600; }
+  .chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 6px 12px; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); font-size: 12px; color: var(--text-dim); }
+  .chip-icon { font-size: 11px; flex-shrink: 0; }
+  .chip-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+  .chip-state { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
+  .chip-bar { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--accent); transition: width 0.15s linear; }
+  .chip.sending { border-color: var(--accent); background: var(--accent-dim); box-shadow: 0 0 10px var(--accent-glow); }
+  .chip.sending .chip-state, .chip.sending .chip-icon { color: var(--accent); }
+  .chip.sending .chip-icon { animation: pulse 1s infinite; }
+  .chip.sent { border-color: #00e5a060; }
+  .chip.sent .chip-icon, .chip.sent .chip-state { color: var(--accent); }
+  .chip.sent .chip-name { opacity: 0.7; }
+  .chip.error { border-color: var(--danger); }
+  .chip.error .chip-icon, .chip.error .chip-state { color: var(--danger); }
+
   .hidden { display: none !important; }
 
   @media (max-width: 500px) {
@@ -241,3 +261,11 @@
     .room-row { flex-direction: column; }
     .info-grid { grid-template-columns: 1fr; }
   }
+  /* Received chips */
+  .chip.recv.receiving { border-color: #4466ff; background: #4466ff18; box-shadow: 0 0 10px #4466ff40; }
+  .chip.recv.receiving .chip-icon, .chip.recv.receiving .chip-state { color: #7f9bff; }
+  .chip.recv.receiving .chip-icon { animation: pulse 1s infinite; }
+  .chip.recv.receiving .chip-bar { background: #7f9bff; }
+  .chip.recv.received { cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+  .chip.recv.received:hover { border-color: var(--accent); background: var(--accent-dim); }
+  .send-queue + .send-queue { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }

@@ -166,12 +166,28 @@
 
   <!-- File Drop -->
   <div class="card">
-    <div class="card-title">Send File</div>
+    <div class="card-title">Files</div>
     <div class="dropzone" id="dropzone">
       <div class="dropzone-icon">📁</div>
-      <div class="dropzone-text">Drop a file here or click to browse</div>
-      <div class="dropzone-hint">Files are sent directly to the peer — no server involved</div>
-      <input type="file" id="fileInput" />
+      <div class="dropzone-text">Drop files here or click to browse</div>
+      <div class="dropzone-hint">Select multiple files at once — they're sent one after another, directly to the peer</div>
+      <input type="file" id="fileInput" multiple />
+    </div>
+    <!-- Send queue chips -->
+    <div class="send-queue hidden" id="sendQueue">
+      <div class="send-queue-head">
+        <span id="queueSummary">Queue</span>
+        <button class="btn btn-secondary btn-small" id="btnClearDone" onclick="clearFinishedChips()">Clear finished</button>
+      </div>
+      <div class="chip-list" id="chipList"></div>
+    </div>
+    <!-- Received file chips -->
+    <div class="send-queue hidden" id="recvQueue">
+      <div class="send-queue-head">
+        <span id="recvSummary">Received</span>
+        <button class="btn btn-secondary btn-small" onclick="clearReceivedChips()">Clear</button>
+      </div>
+      <div class="chip-list" id="recvChipList"></div>
     </div>
   </div>
 
@@ -226,6 +242,13 @@ let selectedRole = null;
 let incomingFile = null;
 let receivedChunks = [];
 let receivedSize = 0;
+let rxChain = Promise.resolve();   // keeps incoming messages strictly in order
+
+// Send queue
+const sendQueue = [];              // [{ id, file, status: 'queued'|'sending'|'sent'|'error' }]
+let isSending = false;
+let idCounter = 0;
+function newId() { return Date.now().toString(36) + '-' + (idCounter++).toString(36) + Math.random().toString(36).slice(2, 6); }
 
 // ═══════════════════════════════════════
 // Helpers
@@ -392,6 +415,7 @@ function setupPeerConn(conn) {
 
   conn.on('close', () => {
     log('Peer disconnected', 'error');
+    failIncoming('Disconnected');
     setStatus('disconnected', 'Peer disconnected');
     document.getElementById('roomHint').textContent = '⚠️ Peer disconnected. Refresh to reconnect.';
     resetJoinButton();
@@ -433,7 +457,7 @@ function createRawPC() {
 function setupRawDC() {
   dataChannel.binaryType = 'arraybuffer';
   dataChannel.onopen = () => { log('Data channel open', 'success'); setStatus('connected', 'Connected — ready to share files'); };
-  dataChannel.onclose = () => { log('Data channel closed'); setStatus('disconnected', 'Disconnected'); };
+  dataChannel.onclose = () => { log('Data channel closed'); failIncoming('Disconnected'); setStatus('disconnected', 'Disconnected'); };
   dataChannel.onerror = (e) => log(`Channel error: ${e.message || 'unknown'}`, 'error');
   dataChannel.onmessage = (e) => handleIncomingData(e.data);
 }
@@ -507,7 +531,7 @@ function addTransferUI(id, name, size, dir) {
     <div class="transfer-item" id="transfer-${id}">
       <div class="transfer-icon">${dir === 'up' ? '↑' : '↓'}</div>
       <div class="transfer-info">
-        <div class="transfer-name">${name}</div>
+        <div class="transfer-name">${escapeHtml(name)}</div>
         <div class="transfer-meta">${formatBytes(size)} · ${dir === 'up' ? 'Sending' : 'Receiving'}</div>
         <div class="transfer-progress"><div class="transfer-progress-bar" id="progress-${id}" style="width:0%"></div></div>
       </div>
@@ -523,47 +547,142 @@ function updateProgress(id, pct) {
   if (pct >= 100) { if (bar) bar.classList.add('complete'); if (txt) txt.style.color = 'var(--accent)'; }
 }
 
-async function sendFile(file) {
+// ── Queue: accept many files, send them one at a time ──
+function enqueueFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
   if (!isConnected()) { log('Not connected yet', 'error'); return; }
-  const id = Date.now().toString(36);
+  for (const file of files) {
+    sendQueue.push({ id: newId(), file, status: 'queued', pct: 0 });
+  }
+  log(`Queued ${files.length} file${files.length > 1 ? 's' : ''}`);
+  renderChips();
+  processQueue();
+}
+
+async function processQueue() {
+  if (isSending) return;            // already working through the queue
+  isSending = true;
+  let item;
+  while ((item = sendQueue.find(q => q.status === 'queued'))) {
+    if (!isConnected()) {
+      sendQueue.filter(q => q.status === 'queued').forEach(q => q.status = 'error');
+      log('Connection lost — remaining files not sent', 'error');
+      break;
+    }
+    item.status = 'sending';
+    renderChips();
+    try {
+      await sendFile(item);
+      item.status = 'sent';
+    } catch (e) {
+      item.status = 'error';
+      log(`Failed: ${item.file.name} — ${e.message}`, 'error');
+    }
+    renderChips();
+  }
+  isSending = false;
+  renderChips();
+}
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// Sends one file; resolves when its last chunk + file-end are handed to the channel
+async function sendFile(item) {
+  const { id, file } = item;
   log(`Sending: ${file.name} (${formatBytes(file.size)})`);
 
   activeSend(JSON.stringify({ type: 'file-meta', id, name: file.name, size: file.size, mime: file.type }));
   addTransferUI(id, file.name, file.size, 'up');
 
-  const buffer = await file.arrayBuffer();
-  const fullArray = new Uint8Array(buffer);
+  const total = file.size;
   let offset = 0;
-  const total = fullArray.byteLength;
-
-  const pump = () => {
-    while (offset < total) {
-      if (getBufferedAmount() > 10 * CHUNK_SIZE) { setTimeout(pump, 20); return; }
-      const end = Math.min(offset + CHUNK_SIZE, total);
-      activeSend(fullArray.slice(offset, end));
-      offset = end;
-      updateProgress(id, (offset / total) * 100);
+  while (offset < total) {
+    // back-pressure: wait while the channel buffer is full
+    while (getBufferedAmount() > 10 * CHUNK_SIZE) {
+      if (!isConnected()) throw new Error('Not connected');
+      await sleep(20);
     }
-    activeSend(JSON.stringify({ type: 'file-end', id }));
-    log(`Sent: ${file.name}`, 'success');
-  };
-  pump();
+    const end = Math.min(offset + CHUNK_SIZE, total);
+    // read only this slice from disk instead of loading the whole file into memory
+    const chunk = new Uint8Array(await file.slice(offset, end).arrayBuffer());
+    activeSend(chunk);
+    offset = end;
+    const pct = (offset / total) * 100;
+    updateProgress(id, pct);
+    updateChipProgress(item, pct);
+  }
+  activeSend(JSON.stringify({ type: 'file-end', id }));
+  updateProgress(id, 100);
+  log(`Sent: ${file.name}`, 'success');
+}
+
+// ── Chips ──
+const CHIP_LABEL = { queued: 'Queued', sending: 'Sending', sent: 'Sent', error: 'Failed' };
+const CHIP_ICON  = { queued: '⏳', sending: '⇡', sent: '✓', error: '✕' };
+
+function renderChips() {
+  const wrap = document.getElementById('sendQueue');
+  const list = document.getElementById('chipList');
+  wrap.classList.toggle('hidden', sendQueue.length === 0);
+
+  list.innerHTML = sendQueue.map(q => `
+    <div class="chip ${q.status}" id="chip-${q.id}" title="${escapeHtml(q.file.name)} · ${formatBytes(q.file.size)}">
+      <span class="chip-icon">${CHIP_ICON[q.status]}</span>
+      <span class="chip-name">${escapeHtml(q.file.name)}</span>
+      <span class="chip-state" id="chip-state-${q.id}">${q.status === 'sending' ? Math.round(q.pct) + '%' : CHIP_LABEL[q.status]}</span>
+      ${q.status === 'sending' ? `<span class="chip-bar" id="chip-bar-${q.id}" style="width:${q.pct}%"></span>` : ''}
+    </div>`).join('');
+
+  const done = sendQueue.filter(q => q.status === 'sent').length;
+  const current = sendQueue.find(q => q.status === 'sending');
+  document.getElementById('queueSummary').innerHTML = current
+    ? `Sending <strong>${escapeHtml(current.file.name)}</strong> · ${done + 1} of ${sendQueue.length}`
+    : `${done} of ${sendQueue.length} sent`;
+}
+
+function updateChipProgress(item, pct) {
+  item.pct = pct;
+  const s = document.getElementById(`chip-state-${item.id}`);
+  const b = document.getElementById(`chip-bar-${item.id}`);
+  if (s) s.textContent = Math.round(pct) + '%';
+  if (b) b.style.width = pct + '%';
+}
+
+function clearFinishedChips() {
+  for (let i = sendQueue.length - 1; i >= 0; i--) {
+    if (sendQueue[i].status === 'sent' || sendQueue[i].status === 'error') sendQueue.splice(i, 1);
+  }
+  renderChips();
 }
 
 // ═══════════════════════════════════════
 // File Receiving
 // ═══════════════════════════════════════
+// Queue every message so async Blob reads can't let a 'file-end' or the next
+// file's 'file-meta' jump ahead of chunks that are still being read.
 function handleIncomingData(data) {
+  rxChain = rxChain.then(() => processIncoming(data)).catch(e => log(`Receive error: ${e.message}`, 'error'));
+}
+
+async function processIncoming(data) {
   // Handle string messages (JSON metadata)
   if (typeof data === 'string') {
     try {
       const msg = JSON.parse(data);
       if (msg.type === 'file-meta') {
-        incomingFile = msg;
+        // a new file started before the previous one finished → previous one is incomplete
+        if (incomingFile) failIncoming('Incomplete');
+        const name = String(msg.name || 'file');
+        const size = Number(msg.size) || 0;
+        // use our own id — the peer's id goes into element ids, so never trust it
+        incomingFile = { id: newId(), name, size, mime: String(msg.mime || '') };
         receivedChunks = [];
         receivedSize = 0;
-        addTransferUI(msg.id, msg.name, msg.size, 'down');
-        log(`Receiving: ${msg.name} (${formatBytes(msg.size)})`);
+        addTransferUI(incomingFile.id, name, size, 'down');
+        recvQueue.push({ id: incomingFile.id, name, size, status: 'receiving', pct: 0, url: null });
+        renderRecvChips();
+        log(`Receiving: ${escapeHtml(name)} (${formatBytes(size)})`);
         return;
       }
       if (msg.type === 'file-end' && incomingFile) { finishReceive(); return; }
@@ -581,12 +700,9 @@ function handleIncomingData(data) {
     byteLength = data.byteLength;
   } else if (data instanceof Blob) {
     // PeerJS sometimes wraps as Blob
-    data.arrayBuffer().then(buf => {
-      receivedChunks.push(new Uint8Array(buf));
-      receivedSize += buf.byteLength;
-      updateProgress(incomingFile.id, (receivedSize / incomingFile.size) * 100);
-    });
-    return;
+    const buf = await data.arrayBuffer();
+    receivedChunks.push(new Uint8Array(buf));
+    byteLength = buf.byteLength;
   } else if (data instanceof Uint8Array || data instanceof Int8Array) {
     receivedChunks.push(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
     byteLength = data.byteLength;
@@ -598,7 +714,9 @@ function handleIncomingData(data) {
 
   if (byteLength > 0) {
     receivedSize += byteLength;
-    updateProgress(incomingFile.id, (receivedSize / incomingFile.size) * 100);
+    const pct = incomingFile.size ? Math.min(100, (receivedSize / incomingFile.size) * 100) : 100;
+    updateProgress(incomingFile.id, pct);
+    updateRecvChipProgress(incomingFile.id, pct);
   }
 }
 
@@ -612,15 +730,86 @@ function finishReceive() {
     offset += chunk.byteLength;
   }
   const blob = new Blob([combined], { type: incomingFile.mime || 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = incomingFile.name;
   a.click();
   updateProgress(incomingFile.id, 100);
-  log(`Received: ${incomingFile.name} (${formatBytes(receivedSize)})`, 'success');
+
+  const item = recvQueue.find(r => r.id === incomingFile.id);
+  if (item) { item.status = 'received'; item.pct = 100; item.url = url; item.size = receivedSize; }
+  renderRecvChips();
+
+  log(`Received: ${escapeHtml(incomingFile.name)} (${formatBytes(receivedSize)})`, 'success');
   incomingFile = null;
   receivedChunks = [];
   receivedSize = 0;
+}
+
+// ── Received chips ──
+const recvQueue = [];   // [{ id, name, size, status: 'receiving'|'received'|'error', pct, url }]
+const RECV_ICON = { receiving: '⇣', received: '✓', error: '✕' };
+
+function failIncoming(reason) {
+  if (!incomingFile) return;
+  const item = recvQueue.find(r => r.id === incomingFile.id);
+  if (item) { item.status = 'error'; item.reason = reason; }
+  log(`${reason}: ${escapeHtml(incomingFile.name)}`, 'error');
+  incomingFile = null; receivedChunks = []; receivedSize = 0;
+  renderRecvChips();
+}
+
+function renderRecvChips() {
+  const wrap = document.getElementById('recvQueue');
+  wrap.classList.toggle('hidden', recvQueue.length === 0);
+
+  document.getElementById('recvChipList').innerHTML = recvQueue.map(r => {
+    const state = r.status === 'receiving' ? Math.round(r.pct) + '%'
+                : r.status === 'received' ? formatBytes(r.size)
+                : (r.reason || 'Failed');
+    const tip = r.status === 'received' ? 'Click to download again' : `${formatBytes(r.size)}`;
+    return `
+    <div class="chip recv ${r.status}" id="rchip-${r.id}" title="${escapeHtml(r.name)} · ${tip}"
+         ${r.status === 'received' ? `onclick="redownload('${r.id}')"` : ''}>
+      <span class="chip-icon">${RECV_ICON[r.status]}</span>
+      <span class="chip-name">${escapeHtml(r.name)}</span>
+      <span class="chip-state" id="rchip-state-${r.id}">${state}</span>
+      ${r.status === 'receiving' ? `<span class="chip-bar" id="rchip-bar-${r.id}" style="width:${r.pct}%"></span>` : ''}
+    </div>`;
+  }).join('');
+
+  const done = recvQueue.filter(r => r.status === 'received').length;
+  const current = recvQueue.find(r => r.status === 'receiving');
+  document.getElementById('recvSummary').innerHTML = current
+    ? `Receiving <strong>${escapeHtml(current.name)}</strong> · ${done} received`
+    : `${done} file${done === 1 ? '' : 's'} received`;
+}
+
+function updateRecvChipProgress(id, pct) {
+  const item = recvQueue.find(r => r.id === id);
+  if (item) item.pct = pct;
+  const s = document.getElementById(`rchip-state-${id}`);
+  const b = document.getElementById(`rchip-bar-${id}`);
+  if (s) s.textContent = Math.round(pct) + '%';
+  if (b) b.style.width = pct + '%';
+}
+
+function redownload(id) {
+  const r = recvQueue.find(x => x.id === id);
+  if (!r || !r.url) return;
+  const a = document.createElement('a');
+  a.href = r.url; a.download = r.name; a.click();
+}
+
+function clearReceivedChips() {
+  for (let i = recvQueue.length - 1; i >= 0; i--) {
+    if (recvQueue[i].status !== 'receiving') {
+      if (recvQueue[i].url) URL.revokeObjectURL(recvQueue[i].url);   // free memory
+      recvQueue.splice(i, 1);
+    }
+  }
+  renderRecvChips();
 }
 
 // ═══════════════════════════════════════
@@ -668,8 +857,8 @@ const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
 dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); if (e.dataTransfer.files.length) sendFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', () => { if (fileInput.files.length) { sendFile(fileInput.files[0]); fileInput.value = ''; } });
+dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); if (e.dataTransfer.files.length) enqueueFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', () => { if (fileInput.files.length) { enqueueFiles(fileInput.files); fileInput.value = ''; } });
 document.getElementById('roomId').addEventListener('keydown', (e) => { if (e.key === 'Enter') joinRoom(); });
 
 // ═══════════════════════════════════════
